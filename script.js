@@ -90,18 +90,29 @@ function clearAllShapes() {
     flowerZone.classList.remove('has-image');
 }
 
-// Place image in shape
+// Place image in shape (Drop Zone)
 function placeImageInShape(zone, shape) {
-    let shapeClass = '';
-    if(shape === 'circle') shapeClass = 'circle-shape';
-    else if(shape === 'hexadecagon') shapeClass = 'hexadecagon-shape';
-    else if(shape === 'flower') shapeClass = 'flower-shape';
+    let poly = '';
+    let borderRadius = '';
     
+    if (shape === 'circle') borderRadius = '50%';
+    else if (shape === 'hexadecagon') poly = hexadecagonPoly;
+    else if (shape === 'flower') poly = flowerPoly;
+
+    const clipStyle = shape === 'circle' ? `border-radius: 50%;` : `clip-path: ${poly};`;
+    
+    // We use a wrapper with background color to simulate the border
     zone.innerHTML = `
-        <img src="${currentImageSrc}" 
-             class="shape-image ${shapeClass}" 
-             alt="Image"
-             style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};">
+        <div style="width: ${currentSize}px; height: ${currentSize}px; 
+                    background: ${dominantColor}; 
+                    display: flex; justify-content: center; align-items: center; 
+                    ${clipStyle}">
+            <img src="${currentImageSrc}" 
+                 alt="Image"
+                 style="width: 100%; height: 100%; object-fit: cover; 
+                        transform: scale(0.92); 
+                        ${clipStyle}">
+        </div>
     `;
     zone.classList.add('has-image');
 }
@@ -136,22 +147,55 @@ function updatePreview() {
         return;
     }
     
-    let shapeClass = '';
-    if(currentShape === 'circle') shapeClass = 'circle-shape';
-    else if(currentShape === 'hexadecagon') shapeClass = 'hexadecagon-shape';
-    else if(currentShape === 'flower') shapeClass = 'flower-shape';
+    const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, dominantColor);
+    wrapper.classList.add('wrapped-image'); // Helper class for float
     
-    resultContainer.innerHTML = `
-        <img 
-            src="${currentImageSrc}" 
-            class="wrapped-image ${shapeClass}"
-            style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};"
-            alt="${currentShape}">
-        ${text}
-    `;
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(wrapper);
+    resultContainer.appendChild(document.createTextNode(text));
     
     downloadBtn.style.display = 'block';
 }
+
+// Helper to create the shape DOM structure
+function createShapeWrapper(size, shape, src, color) {
+    const div = document.createElement('div');
+    const img = document.createElement('img');
+    
+    div.style.width = size + 'px';
+    div.style.height = size + 'px';
+    div.style.background = color; // Border color
+    div.style.float = 'left';
+    div.style.margin = '0 15px 5px 0';
+    div.style.display = 'flex';
+    div.style.justifyContent = 'center';
+    div.style.alignItems = 'center';
+    
+    img.src = src;
+    img.style.width = '100%';
+    img.style.height = '100%';
+    img.style.objectFit = 'cover';
+    img.style.transform = 'scale(0.92)'; // Shrink image to reveal background (border)
+    
+    if (shape === 'circle') {
+        div.style.borderRadius = '50%';
+        div.style.shapeOutside = 'circle(50%)';
+        div.style.webkitShapeOutside = 'circle(50%)';
+        img.style.borderRadius = '50%';
+    } else {
+        const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
+        div.style.clipPath = poly;
+        div.style.webkitClipPath = poly;
+        div.style.shapeOutside = poly;
+        div.style.webkitShapeOutside = poly;
+        img.style.clipPath = poly;
+        img.style.webkitClipPath = poly;
+    }
+    
+    div.appendChild(img);
+    return div;
+}
+
 
 // MODAL HANDLING
 downloadBtn.addEventListener('click', function() {
@@ -192,7 +236,7 @@ async function downloadAutoSize() {
     try {
         await new Promise(resolve => setTimeout(resolve, 200));
         
-        // Use htmlToImage instead of html2canvas
+        // Use htmlToImage
         const dataUrl = await htmlToImage.toPng(resultContainer, {
             backgroundColor: '#ffffff',
             pixelRatio: 3,
@@ -218,13 +262,12 @@ async function downloadWithSize(width, height) {
     
     try {
         const imageCircleSize = Math.min(width, height) * 0.35;
-        const borderWidth = imageCircleSize * 0.04;
         const fontSize = width * 0.024;
         
         const tempContainer = document.createElement('div');
         tempContainer.style.width = width + 'px';
         tempContainer.style.height = height + 'px';
-        tempContainer.style.position = 'fixed'; // Must be fixed to be captured properly off-screen
+        tempContainer.style.position = 'fixed'; 
         tempContainer.style.left = '-9999px';
         tempContainer.style.top = '0';
         tempContainer.style.background = '#ffffff';
@@ -236,43 +279,24 @@ async function downloadWithSize(width, height) {
         tempContainer.style.color = '#333';
         tempContainer.style.textAlign = 'justify';
         
-        const text = teluguText.value;
-        let shapeCSS = '';
+        // Re-create the shape wrapper logic for the download container
+        const wrapper = createShapeWrapper(imageCircleSize, currentShape, currentImageSrc, dominantColor);
+        // Adjust margin for the larger download size
+        wrapper.style.margin = `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0`;
         
-        // Explicitly set both clip-path and shape-outside with webkit prefixes
-        if (currentShape === 'circle') {
-            shapeCSS = 'border-radius: 50%; shape-outside: circle(50%); -webkit-shape-outside: circle(50%);';
-        } else if (currentShape === 'hexadecagon') {
-            shapeCSS = `clip-path: ${hexadecagonPoly}; -webkit-clip-path: ${hexadecagonPoly}; shape-outside: ${hexadecagonPoly}; -webkit-shape-outside: ${hexadecagonPoly};`;
-        } else if (currentShape === 'flower') {
-            shapeCSS = `clip-path: ${flowerPoly}; -webkit-clip-path: ${flowerPoly}; shape-outside: ${flowerPoly}; -webkit-shape-outside: ${flowerPoly};`;
-        }
-        
-        tempContainer.innerHTML = `
-            <img 
-                src="${currentImageSrc}" 
-                style="float: left; 
-                       margin: 0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0; 
-                       ${shapeCSS}
-                       width: ${imageCircleSize}px; 
-                       height: ${imageCircleSize}px; 
-                       border: ${borderWidth}px solid ${dominantColor}; 
-                       object-fit: cover;
-                       display: block;"
-                alt="${currentShape}">
-            ${text}
-        `;
+        tempContainer.appendChild(wrapper);
+        tempContainer.appendChild(document.createTextNode(teluguText.value));
         
         document.body.appendChild(tempContainer);
         
         // Allow DOM to settle
-        await new Promise(resolve => setTimeout(resolve, 300));
+        await new Promise(resolve => setTimeout(resolve, 500));
         
         const dataUrl = await htmlToImage.toPng(tempContainer, {
             backgroundColor: '#ffffff',
             width: width,
             height: height,
-            pixelRatio: 1, // Exact size
+            pixelRatio: 1, 
             style: {
                  fontFamily: "'Noto Sans Telugu', sans-serif"
             }
