@@ -3,8 +3,11 @@ const imageUpload = document.getElementById('imageUpload');
 const previewImg = document.getElementById('previewImg');
 const imagePreview = document.getElementById('imagePreview');
 const noImageText = imagePreview.querySelector('.no-image');
+const addButtons = document.querySelector('.add-buttons');
 const addToCircleBtn = document.getElementById('addToCircleBtn');
+const addToHexagonBtn = document.getElementById('addToHexagonBtn');
 const circleZone = document.getElementById('circleZone');
+const hexagonZone = document.getElementById('hexagonZone');
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
 const sizeValue = document.getElementById('sizeValue');
@@ -16,7 +19,7 @@ const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
 
 // Store current state
 let currentImageSrc = null;
-let hasImageInCircle = false;
+let currentShape = null;
 let currentSize = 100;
 let dominantColor = '#667eea';
 
@@ -36,7 +39,7 @@ imageUpload.addEventListener('change', function(e) {
             previewImg.classList.add('visible');
             noImageText.classList.add('hidden');
             
-            addToCircleBtn.style.display = 'inline-block';
+            addButtons.style.display = 'flex';
             
             previewImg.onload = function() {
                 try {
@@ -57,20 +60,42 @@ imageUpload.addEventListener('change', function(e) {
 // ADD TO CIRCLE BUTTON
 addToCircleBtn.addEventListener('click', function() {
     if (currentImageSrc) {
-        placeImageInCircle();
+        clearAllShapes();
+        currentShape = 'circle';
+        placeImageInShape(circleZone, 'circle');
         updatePreview();
     }
 });
 
-function placeImageInCircle() {
-    circleZone.innerHTML = `
+// ADD TO HEXAGON BUTTON
+addToHexagonBtn.addEventListener('click', function() {
+    if (currentImageSrc) {
+        clearAllShapes();
+        currentShape = 'hexagon';
+        placeImageInShape(hexagonZone, 'hexagon');
+        updatePreview();
+    }
+});
+
+// Clear all shapes
+function clearAllShapes() {
+    circleZone.innerHTML = '<div class="circle-preview"><span class="drop-text">⭕</span></div>';
+    hexagonZone.innerHTML = '<div class="hexagon-preview"><span class="drop-text">⬡</span></div>';
+    circleZone.classList.remove('has-image');
+    hexagonZone.classList.remove('has-image');
+}
+
+// Place image in shape
+function placeImageInShape(zone, shape) {
+    const shapeClass = shape === 'circle' ? 'circle-shape' : 'hexagon-shape';
+    
+    zone.innerHTML = `
         <img src="${currentImageSrc}" 
-             class="circle-image" 
+             class="shape-image ${shapeClass}" 
              alt="Image"
              style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};">
     `;
-    circleZone.classList.add('has-image');
-    hasImageInCircle = true;
+    zone.classList.add('has-image');
 }
 
 // SIZE CONTROL
@@ -78,8 +103,9 @@ imageSize.addEventListener('input', function(e) {
     currentSize = e.target.value;
     sizeValue.textContent = currentSize + 'px';
     
-    if (hasImageInCircle) {
-        placeImageInCircle();
+    if (currentShape) {
+        const zone = currentShape === 'circle' ? circleZone : hexagonZone;
+        placeImageInShape(zone, currentShape);
     }
     
     updatePreview();
@@ -92,18 +118,20 @@ teluguText.addEventListener('input', updatePreview);
 function updatePreview() {
     const text = teluguText.value.trim();
     
-    if (!hasImageInCircle || !currentImageSrc || !text) {
-        resultContainer.innerHTML = '<p class="placeholder">Choose image and add to circle</p>';
+    if (!currentShape || !currentImageSrc || !text) {
+        resultContainer.innerHTML = '<p class="placeholder">Choose image and add to shape</p>';
         downloadBtn.style.display = 'none';
         return;
     }
     
+    const shapeClass = currentShape === 'circle' ? 'circle-shape' : 'hexagon-shape';
+    
     resultContainer.innerHTML = `
         <img 
             src="${currentImageSrc}" 
-            class="wrapped-image"
+            class="wrapped-image ${shapeClass}"
             style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};"
-            alt="Circle">
+            alt="${currentShape}">
         ${text}
     `;
     
@@ -173,7 +201,7 @@ async function downloadAutoSize() {
             const link = document.createElement('a');
             const timestamp = new Date().getTime();
             
-            link.download = `telugu-text-wrap-auto-${timestamp}.png`;
+            link.download = `telugu-text-wrap-${currentShape}-auto-${timestamp}.png`;
             link.href = url;
             link.click();
             
@@ -218,18 +246,22 @@ async function downloadWithSize(width, height) {
         tempContainer.style.borderRadius = '20px';
         
         const text = teluguText.value;
+        const shapeClass = currentShape === 'circle' ? 'circle-shape' : 'hexagon-shape';
+        const shapeCSS = currentShape === 'circle' 
+            ? 'border-radius: 50%; shape-outside: circle(50%);'
+            : 'clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); shape-outside: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);';
+        
         tempContainer.innerHTML = `
             <img 
                 src="${currentImageSrc}" 
                 style="float: left; 
                        margin: 0 ${fontSize * 1.2}px ${fontSize * 0.8}px 0; 
-                       border-radius: 50%; 
+                       ${shapeCSS}
                        width: ${imageCircleSize}px; 
                        height: ${imageCircleSize}px; 
                        border: ${borderWidth}px solid ${dominantColor}; 
-                       object-fit: cover;
-                       shape-outside: circle(50%);"
-                alt="Circle">
+                       object-fit: cover;"
+                alt="${currentShape}">
             ${text}
         `;
         
@@ -258,7 +290,7 @@ async function downloadWithSize(width, height) {
             const link = document.createElement('a');
             const timestamp = new Date().getTime();
             
-            link.download = `telugu-text-wrap-${width}x${height}-${timestamp}.png`;
+            link.download = `telugu-text-wrap-${currentShape}-${width}x${height}-${timestamp}.png`;
             link.href = url;
             link.click();
             
@@ -279,7 +311,7 @@ async function downloadWithSize(width, height) {
 
 // MOBILE: Tap to upload
 imagePreview.addEventListener('click', function(e) {
-    if (e.target !== addToCircleBtn && !previewImg.classList.contains('visible')) {
+    if (!e.target.closest('.add-buttons') && !previewImg.classList.contains('visible')) {
         imageUpload.click();
     }
 });

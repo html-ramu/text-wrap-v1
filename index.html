@@ -31,20 +31,39 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
-            <!-- Image Preview with Add Button -->
+            <!-- Image Preview with Add Buttons -->
             <div id="imagePreview" class="image-preview">
                 <img id="previewImg" src="" alt="">
                 <p class="no-image">No image selected</p>
-                <button id="addToCircleBtn" class="add-to-circle-btn" style="display: none;">
-                    ➕ Add to Circle
-                </button>
+                <div class="add-buttons" style="display: none;">
+                    <button id="addToCircleBtn" class="add-shape-btn circle-btn">
+                        ➕ Circle
+                    </button>
+                    <button id="addToHexagonBtn" class="add-shape-btn hexagon-btn">
+                        ➕ Hexagon
+                    </button>
+                </div>
             </div>
 
-            <!-- Circle Drop Zone -->
-            <div class="drop-zone-container">
-                <div class="drop-zone" id="circleZone">
-                    <div class="circle-preview">
-                        <span class="drop-text">Circle</span>
+            <!-- Shape Drop Zones -->
+            <div class="drop-zones-container">
+                <!-- Circle Zone -->
+                <div class="shape-zone">
+                    <p class="zone-label">Circle</p>
+                    <div class="drop-zone" id="circleZone" data-shape="circle">
+                        <div class="circle-preview">
+                            <span class="drop-text">⭕</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hexagon Zone -->
+                <div class="shape-zone">
+                    <p class="zone-label">Hexagon</p>
+                    <div class="drop-zone" id="hexagonZone" data-shape="hexagon">
+                        <div class="hexagon-preview">
+                            <span class="drop-text">⬡</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -76,7 +95,7 @@
                 </button>
             </div>
             <div id="resultContainer" class="result-container">
-                <p class="placeholder">Choose image and add to circle</p>
+                <p class="placeholder">Choose image and add to shape</p>
             </div>
         </div>
 

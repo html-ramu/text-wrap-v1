@@ -63,7 +63,7 @@ header h1 {
     transform: scale(0.97);
 }
 
-/* Image Preview with Button */
+/* Image Preview with Buttons */
 .image-preview {
     text-align: center;
     margin: 15px 0;
@@ -95,34 +95,65 @@ header h1 {
     display: none;
 }
 
-/* Add to Circle Button */
-.add-to-circle-btn {
-    background: #28a745;
-    color: white;
+/* Add Shape Buttons */
+.add-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 10px;
+}
+
+.add-shape-btn {
+    flex: 1;
+    max-width: 120px;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 15px;
     border-radius: 8px;
-    font-size: 0.9em;
+    font-size: 0.85em;
     font-weight: 600;
     cursor: pointer;
     font-family: 'Noto Sans Telugu', sans-serif;
     transition: all 0.2s;
-    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
-    margin-top: 10px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.add-to-circle-btn:hover {
+.circle-btn {
+    background: #28a745;
+    color: white;
+}
+
+.circle-btn:active {
     background: #218838;
-}
-
-.add-to-circle-btn:active {
-    background: #1e7e34;
     transform: scale(0.97);
 }
 
-/* Drop Zone Container */
-.drop-zone-container {
+.hexagon-btn {
+    background: #f093fb;
+    color: white;
+}
+
+.hexagon-btn:active {
+    background: #f5576c;
+    transform: scale(0.97);
+}
+
+/* Drop Zones Container */
+.drop-zones-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
     margin-bottom: 15px;
+}
+
+.shape-zone {
+    text-align: center;
+}
+
+.zone-label {
+    font-size: 0.85em;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 8px;
 }
 
 .drop-zone {
@@ -133,7 +164,7 @@ header h1 {
     border: 2px dashed #ddd;
     border-radius: 12px;
     padding: 15px;
-    min-height: 140px;
+    min-height: 120px;
     transition: all 0.3s;
 }
 
@@ -145,8 +176,8 @@ header h1 {
 
 /* Circle Preview */
 .circle-preview {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
     background: linear-gradient(135deg, #667eea, #764ba2);
     display: flex;
@@ -154,7 +185,22 @@ header h1 {
     justify-content: center;
     color: white;
     font-weight: 600;
-    font-size: 0.9em;
+    font-size: 2em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Hexagon Preview */
+.hexagon-preview {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #f093fb, #f5576c);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 2em;
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -162,13 +208,18 @@ header h1 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Image in Circle */
-.circle-image {
-    width: 100px;
-    height: 100px;
-    border-radius: 50%;
+/* Shape Images */
+.shape-image {
     object-fit: cover;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.shape-image.circle-shape {
+    border-radius: 50%;
+}
+
+.shape-image.hexagon-shape {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
 /* Size Control */
@@ -314,9 +365,17 @@ textarea:focus {
 .wrapped-image {
     float: left;
     margin: 0 12px 10px 0;
+    object-fit: cover;
+}
+
+.wrapped-image.circle-shape {
     border-radius: 50%;
     shape-outside: circle(50%);
-    object-fit: cover;
+}
+
+.wrapped-image.hexagon-shape {
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    shape-outside: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
 }
 
 /* Clear float after text */
@@ -435,7 +494,7 @@ textarea:focus {
     font-weight: 700;
 }
 
-/* Auto Size Button - Special Styling */
+/* Auto Size Button */
 .auto-size-btn {
     background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
     border-color: #ffc107;
@@ -464,10 +523,14 @@ textarea:focus {
         font-size: 1.1em;
     }
     
+    .drop-zones-container {
+        grid-template-columns: 1fr;
+    }
+    
     .circle-preview,
-    .circle-image {
-        width: 80px;
-        height: 80px;
+    .hexagon-preview {
+        width: 70px;
+        height: 70px;
     }
     
     .result-container {
@@ -494,7 +557,7 @@ textarea:focus {
 
 /* Touch feedback */
 @media (hover: none) {
-    .add-to-circle-btn:active {
+    .add-shape-btn:active {
         transform: scale(0.97);
     }
     
