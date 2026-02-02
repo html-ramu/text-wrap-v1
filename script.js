@@ -10,12 +10,15 @@ const imageSize = document.getElementById('imageSize');
 const sizeValue = document.getElementById('sizeValue');
 const resultContainer = document.getElementById('resultContainer');
 const downloadBtn = document.getElementById('downloadBtn');
+const sizeModal = document.getElementById('sizeModal');
+const closeModal = document.getElementById('closeModal');
+const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
 
 // Store current state
 let currentImageSrc = null;
 let hasImageInCircle = false;
 let currentSize = 100;
-let dominantColor = '#667eea'; // Default color
+let dominantColor = '#667eea';
 
 // Initialize ColorThief
 const colorThief = new ColorThief();
@@ -130,32 +133,95 @@ function updatePreview() {
 }
 
 // ==========================================
-// HIGH QUALITY DOWNLOAD
+// MODAL HANDLING
 // ==========================================
 
-downloadBtn.addEventListener('click', async function() {
-    // Disable button during download
+// Show modal when download button clicked
+downloadBtn.addEventListener('click', function() {
+    sizeModal.classList.add('show');
+});
+
+// Close modal when X clicked
+closeModal.addEventListener('click', function() {
+    sizeModal.classList.remove('show');
+});
+
+// Close modal when clicking outside
+sizeModal.addEventListener('click', function(e) {
+    if (e.target === sizeModal) {
+        sizeModal.classList.remove('show');
+    }
+});
+
+// ==========================================
+// DOWNLOAD WITH SIZE SELECTION
+// ==========================================
+
+sizeOptionBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const width = parseInt(this.dataset.width);
+        const height = parseInt(this.dataset.height);
+        
+        // Close modal
+        sizeModal.classList.remove('show');
+        
+        // Start download with selected size
+        downloadWithSize(width, height);
+    });
+});
+
+async function downloadWithSize(width, height) {
+    // Show processing state
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
     
     try {
-        // Wait a bit to ensure everything is rendered
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Create a temporary container with exact size
+        const tempContainer = document.createElement('div');
+        tempContainer.style.width = width + 'px';
+        tempContainer.style.height = height + 'px';
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.background = '#ffffff';
+        tempContainer.style.padding = '30px';
+        tempContainer.style.boxSizing = 'border-box';
+        tempContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
+        tempContainer.style.fontSize = '16px';
+        tempContainer.style.lineHeight = '1.7';
+        tempContainer.style.color = '#333';
+        tempContainer.style.textAlign = 'justify';
+        
+        // Clone the content
+        const text = teluguText.value;
+        tempContainer.innerHTML = `
+            <img 
+                src="${currentImageSrc}" 
+                style="float: left; margin: 0 20px 15px 0; border-radius: 50%; 
+                       width: ${currentSize * 1.5}px; height: ${currentSize * 1.5}px; 
+                       border: 6px solid ${dominantColor}; object-fit: cover;
+                       shape-outside: circle(50%);"
+                alt="Circle">
+            ${text}
+        `;
+        
+        document.body.appendChild(tempContainer);
+        
+        // Wait for fonts and images to load
+        await new Promise(resolve => setTimeout(resolve, 200));
         
         // Capture with html2canvas
-        const canvas = await html2canvas(resultContainer, {
+        const canvas = await html2canvas(tempContainer, {
             backgroundColor: '#ffffff',
-            scale: 3,
+            scale: 2,
+            width: width,
+            height: height,
             logging: false,
             useCORS: true,
-            allowTaint: true,
-            onclone: function(clonedDoc) {
-                const clonedContainer = clonedDoc.getElementById('resultContainer');
-                if (clonedContainer) {
-                    clonedContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
-                }
-            }
+            allowTaint: true
         });
+        
+        // Remove temp container
+        document.body.removeChild(tempContainer);
         
         // Convert to blob and download
         canvas.toBlob(function(blob) {
@@ -167,7 +233,7 @@ downloadBtn.addEventListener('click', async function() {
             const link = document.createElement('a');
             const timestamp = new Date().getTime();
             
-            link.download = `telugu-text-wrap-${timestamp}.png`;
+            link.download = `telugu-text-wrap-${width}x${height}-${timestamp}.png`;
             link.href = url;
             link.click();
             
@@ -187,21 +253,20 @@ downloadBtn.addEventListener('click', async function() {
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
-});
+}
 
 // ==========================================
 // MOBILE: Tap to upload
 // ==========================================
 
 imagePreview.addEventListener('click', function(e) {
-    // Only trigger upload if clicking on the preview area (not the button)
     if (e.target !== addToCircleBtn && !previewImg.classList.contains('visible')) {
         imageUpload.click();
     }
 });
 
 // ==========================================
-// ENSURE FONTS AND LIBRARIES ARE LOADED
+// ENSURE FONTS ARE LOADED
 // ==========================================
 
 window.addEventListener('load', function() {

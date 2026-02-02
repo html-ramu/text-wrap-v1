@@ -162,14 +162,13 @@ header h1 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Image in Circle - WITH COLORED BORDER */
+/* Image in Circle */
 .circle-image {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    /* Border will be added dynamically via JavaScript */
 }
 
 /* Size Control */
@@ -311,14 +310,13 @@ textarea:focus {
     font-size: 0.9em;
 }
 
-/* Wrapped Image - WITH COLORED BORDER */
+/* Wrapped Image */
 .wrapped-image {
     float: left;
     margin: 0 12px 10px 0;
     border-radius: 50%;
     shape-outside: circle(50%);
     object-fit: cover;
-    /* Border will be added dynamically via JavaScript */
 }
 
 /* Clear float after text */
@@ -326,6 +324,122 @@ textarea:focus {
     content: "";
     display: table;
     clear: both;
+}
+
+/* ========================================== */
+/* MODAL STYLES */
+/* ========================================== */
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    animation: fadeIn 0.3s;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    animation: slideUp 0.3s;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px 15px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    font-size: 1.2em;
+    margin: 0;
+}
+
+.close-modal {
+    font-size: 2em;
+    line-height: 0.8;
+    cursor: pointer;
+    color: white;
+    transition: transform 0.2s;
+}
+
+.close-modal:hover {
+    transform: scale(1.2);
+}
+
+.modal-body {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.size-option-btn {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 2px solid #ddd;
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'Noto Sans Telugu', sans-serif;
+    text-align: center;
+}
+
+.size-option-btn:hover {
+    border-color: #667eea;
+    background: linear-gradient(135deg, #e8f0ff 0%, #d0e0ff 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+}
+
+.size-option-btn:active {
+    transform: translateY(0);
+}
+
+.size-label {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.size-dimensions {
+    font-size: 1em;
+    color: #667eea;
+    font-weight: 600;
 }
 
 /* Very small phones */
@@ -352,11 +466,23 @@ textarea:focus {
     .download-btn {
         width: 100%;
     }
+    
+    .modal-content {
+        width: 95%;
+    }
+    
+    .size-option-btn {
+        padding: 15px;
+    }
 }
 
 /* Touch feedback */
 @media (hover: none) {
     .add-to-circle-btn:active {
         transform: scale(0.97);
+    }
+    
+    .size-option-btn:active {
+        transform: translateY(0);
     }
 }
