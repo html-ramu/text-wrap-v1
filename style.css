@@ -63,16 +63,66 @@ header h1 {
     transform: scale(0.97);
 }
 
+/* Image Preview with Button */
+.image-preview {
+    text-align: center;
+    margin: 15px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.image-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    display: none;
+    margin: 0 auto 10px auto;
+}
+
+.image-preview img.visible {
+    display: block;
+}
+
+.no-image {
+    color: #999;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.no-image.hidden {
+    display: none;
+}
+
+/* Add to Circle Button */
+.add-to-circle-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Noto Sans Telugu', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+    margin-top: 10px;
+}
+
+.add-to-circle-btn:hover {
+    background: #218838;
+}
+
+.add-to-circle-btn:active {
+    background: #1e7e34;
+    transform: scale(0.97);
+}
+
 /* Drop Zone Container */
 .drop-zone-container {
     margin-bottom: 15px;
-}
-
-.instruction {
-    text-align: center;
-    color: #666;
-    font-size: 0.85em;
-    margin-bottom: 10px;
 }
 
 .drop-zone {
@@ -85,12 +135,6 @@ header h1 {
     padding: 15px;
     min-height: 140px;
     transition: all 0.3s;
-}
-
-.drop-zone.drag-over {
-    border-color: #667eea;
-    background: #e8f0ff;
-    transform: scale(1.02);
 }
 
 .drop-zone.has-image {
@@ -118,47 +162,14 @@ header h1 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Image in Circle */
+/* Image in Circle - WITH COLORED BORDER */
 .circle-image {
     width: 100px;
     height: 100px;
     border-radius: 50%;
     object-fit: cover;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-/* Draggable Image Preview */
-.image-preview {
-    text-align: center;
-    margin: 15px 0;
-}
-
-.image-preview img {
-    max-width: 150px;
-    max-height: 150px;
-    border-radius: 8px;
-    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
-    cursor: grab;
-    display: none;
-}
-
-.image-preview img:active {
-    cursor: grabbing;
-}
-
-.image-preview img.visible {
-    display: block;
-    margin: 0 auto;
-}
-
-.no-image {
-    color: #999;
-    font-size: 0.85em;
-    font-style: italic;
-}
-
-.no-image.hidden {
-    display: none;
+    /* Border will be added dynamically via JavaScript */
 }
 
 /* Size Control */
@@ -300,13 +311,14 @@ textarea:focus {
     font-size: 0.9em;
 }
 
-/* Wrapped Image */
+/* Wrapped Image - WITH COLORED BORDER */
 .wrapped-image {
     float: left;
     margin: 0 12px 10px 0;
     border-radius: 50%;
     shape-outside: circle(50%);
     object-fit: cover;
+    /* Border will be added dynamically via JavaScript */
 }
 
 /* Clear float after text */
@@ -344,8 +356,7 @@ textarea:focus {
 
 /* Touch feedback */
 @media (hover: none) {
-    .drop-zone:active {
-        border-color: #667eea;
-        background: #e8f0ff;
+    .add-to-circle-btn:active {
+        transform: scale(0.97);
     }
 }

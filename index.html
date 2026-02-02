@@ -31,20 +31,22 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
+            <!-- Image Preview with Add Button -->
+            <div id="imagePreview" class="image-preview">
+                <img id="previewImg" src="" alt="">
+                <p class="no-image">No image selected</p>
+                <button id="addToCircleBtn" class="add-to-circle-btn" style="display: none;">
+                    ➕ Add to Circle
+                </button>
+            </div>
+
             <!-- Circle Drop Zone -->
             <div class="drop-zone-container">
-                <p class="instruction">Drag image here 👇</p>
                 <div class="drop-zone" id="circleZone">
                     <div class="circle-preview">
                         <span class="drop-text">Circle</span>
                     </div>
                 </div>
-            </div>
-
-            <!-- Draggable Image Preview -->
-            <div id="imagePreview" class="image-preview">
-                <img id="previewImg" src="" alt="" draggable="true">
-                <p class="no-image">Select image above</p>
             </div>
 
             <!-- Size Control -->
@@ -74,13 +76,14 @@
                 </button>
             </div>
             <div id="resultContainer" class="result-container">
-                <p class="placeholder">Drag image to circle</p>
+                <p class="placeholder">Choose image and add to circle</p>
             </div>
         </div>
 
     </div>
 
-    <!-- Load html2canvas library for screenshot -->
+    <!-- ColorThief library for extracting dominant color -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>
 </body>

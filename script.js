@@ -3,6 +3,7 @@ const imageUpload = document.getElementById('imageUpload');
 const previewImg = document.getElementById('previewImg');
 const imagePreview = document.getElementById('imagePreview');
 const noImageText = imagePreview.querySelector('.no-image');
+const addToCircleBtn = document.getElementById('addToCircleBtn');
 const circleZone = document.getElementById('circleZone');
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
@@ -14,6 +15,10 @@ const downloadBtn = document.getElementById('downloadBtn');
 let currentImageSrc = null;
 let hasImageInCircle = false;
 let currentSize = 100;
+let dominantColor = '#667eea'; // Default color
+
+// Initialize ColorThief
+const colorThief = new ColorThief();
 
 // ==========================================
 // IMAGE UPLOAD
@@ -30,7 +35,21 @@ imageUpload.addEventListener('change', function(e) {
             previewImg.src = currentImageSrc;
             previewImg.classList.add('visible');
             noImageText.classList.add('hidden');
-            previewImg.draggable = true;
+            
+            // Show "Add to Circle" button
+            addToCircleBtn.style.display = 'inline-block';
+            
+            // Extract dominant color when image loads
+            previewImg.onload = function() {
+                try {
+                    const color = colorThief.getColor(previewImg);
+                    dominantColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    console.log('Dominant color:', dominantColor);
+                } catch (error) {
+                    console.log('Using default color');
+                    dominantColor = '#667eea';
+                }
+            };
         };
         
         reader.readAsDataURL(file);
@@ -38,56 +57,23 @@ imageUpload.addEventListener('change', function(e) {
 });
 
 // ==========================================
-// DRAG AND DROP
+// ADD TO CIRCLE BUTTON
 // ==========================================
 
-// Start dragging
-previewImg.addEventListener('dragstart', function(e) {
-    e.dataTransfer.effectAllowed = 'copy';
-    this.style.opacity = '0.5';
-});
-
-// End dragging
-previewImg.addEventListener('dragend', function(e) {
-    this.style.opacity = '1';
-});
-
-// Prevent defaults
-['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-    circleZone.addEventListener(eventName, function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }, false);
-});
-
-// Highlight on drag over
-['dragenter', 'dragover'].forEach(eventName => {
-    circleZone.addEventListener(eventName, function() {
-        circleZone.classList.add('drag-over');
-    }, false);
-});
-
-['dragleave', 'drop'].forEach(eventName => {
-    circleZone.addEventListener(eventName, function() {
-        circleZone.classList.remove('drag-over');
-    }, false);
-});
-
-// Handle drop
-circleZone.addEventListener('drop', function(e) {
+addToCircleBtn.addEventListener('click', function() {
     if (currentImageSrc) {
         placeImageInCircle();
         updatePreview();
     }
-}, false);
+});
 
-// Place image in circle
+// Place image in circle with colored border
 function placeImageInCircle() {
     circleZone.innerHTML = `
         <img src="${currentImageSrc}" 
              class="circle-image" 
              alt="Image"
-             style="width: ${currentSize}px; height: ${currentSize}px;">
+             style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};">
     `;
     circleZone.classList.add('has-image');
     hasImageInCircle = true;
@@ -124,17 +110,17 @@ function updatePreview() {
     
     // If no image in circle or no text
     if (!hasImageInCircle || !currentImageSrc || !text) {
-        resultContainer.innerHTML = '<p class="placeholder">Drag image to circle</p>';
+        resultContainer.innerHTML = '<p class="placeholder">Choose image and add to circle</p>';
         downloadBtn.style.display = 'none';
         return;
     }
     
-    // Create wrapped content
+    // Create wrapped content with colored border
     resultContainer.innerHTML = `
         <img 
             src="${currentImageSrc}" 
             class="wrapped-image"
-            style="width: ${currentSize}px; height: ${currentSize}px;"
+            style="width: ${currentSize}px; height: ${currentSize}px; border: 4px solid ${dominantColor};"
             alt="Circle">
         ${text}
     `;
@@ -144,7 +130,7 @@ function updatePreview() {
 }
 
 // ==========================================
-// HIGH QUALITY DOWNLOAD WITH FONT FIX
+// HIGH QUALITY DOWNLOAD
 // ==========================================
 
 downloadBtn.addEventListener('click', async function() {
@@ -153,18 +139,17 @@ downloadBtn.addEventListener('click', async function() {
     downloadBtn.textContent = 'Processing...';
     
     try {
-        // Wait a bit to ensure fonts are rendered
+        // Wait a bit to ensure everything is rendered
         await new Promise(resolve => setTimeout(resolve, 100));
         
         // Capture with html2canvas
         const canvas = await html2canvas(resultContainer, {
             backgroundColor: '#ffffff',
-            scale: 3, // 3x for good quality and reasonable file size
+            scale: 3,
             logging: false,
             useCORS: true,
             allowTaint: true,
             onclone: function(clonedDoc) {
-                // Ensure the cloned document has proper styles
                 const clonedContainer = clonedDoc.getElementById('resultContainer');
                 if (clonedContainer) {
                     clonedContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
@@ -208,18 +193,18 @@ downloadBtn.addEventListener('click', async function() {
 // MOBILE: Tap to upload
 // ==========================================
 
-imagePreview.addEventListener('click', function() {
-    if (!previewImg.classList.contains('visible')) {
+imagePreview.addEventListener('click', function(e) {
+    // Only trigger upload if clicking on the preview area (not the button)
+    if (e.target !== addToCircleBtn && !previewImg.classList.contains('visible')) {
         imageUpload.click();
     }
 });
 
 // ==========================================
-// ENSURE FONTS ARE LOADED ON PAGE LOAD
+// ENSURE FONTS AND LIBRARIES ARE LOADED
 // ==========================================
 
 window.addEventListener('load', function() {
-    // Check if fonts are loaded
     if (document.fonts) {
         document.fonts.ready.then(function() {
             console.log('Telugu fonts loaded successfully');
