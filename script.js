@@ -93,10 +93,8 @@ function clearAllShapes() {
 // Place image in shape (Drop Zone)
 function placeImageInShape(zone, shape) {
     let poly = '';
-    let borderRadius = '';
     
-    if (shape === 'circle') borderRadius = '50%';
-    else if (shape === 'hexadecagon') poly = hexadecagonPoly;
+    if (shape === 'hexadecagon') poly = hexadecagonPoly;
     else if (shape === 'flower') poly = flowerPoly;
 
     const clipStyle = shape === 'circle' ? `border-radius: 50%;` : `clip-path: ${poly};`;
@@ -148,7 +146,7 @@ function updatePreview() {
     }
     
     const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, dominantColor);
-    wrapper.classList.add('wrapped-image'); // Helper class for float
+    wrapper.classList.add('wrapped-image');
     
     resultContainer.innerHTML = '';
     resultContainer.appendChild(wrapper);
@@ -175,7 +173,7 @@ function createShapeWrapper(size, shape, src, color) {
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
-    img.style.transform = 'scale(0.92)'; // Shrink image to reveal background (border)
+    img.style.transform = 'scale(0.92)'; // Shrink image to reveal background
     
     if (shape === 'circle') {
         div.style.borderRadius = '50%';
@@ -236,7 +234,6 @@ async function downloadAutoSize() {
     try {
         await new Promise(resolve => setTimeout(resolve, 200));
         
-        // Use htmlToImage
         const dataUrl = await htmlToImage.toPng(resultContainer, {
             backgroundColor: '#ffffff',
             pixelRatio: 3,
@@ -267,9 +264,14 @@ async function downloadWithSize(width, height) {
         const tempContainer = document.createElement('div');
         tempContainer.style.width = width + 'px';
         tempContainer.style.height = height + 'px';
+        
+        // FIXED: Position ON SCREEN but hidden behind everything using z-index
+        // This ensures browser renders it, unlike left: -9999px
         tempContainer.style.position = 'fixed'; 
-        tempContainer.style.left = '-9999px';
+        tempContainer.style.left = '0';
         tempContainer.style.top = '0';
+        tempContainer.style.zIndex = '-9999'; 
+        
         tempContainer.style.background = '#ffffff';
         tempContainer.style.padding = '40px';
         tempContainer.style.boxSizing = 'border-box';
@@ -281,7 +283,6 @@ async function downloadWithSize(width, height) {
         
         // Re-create the shape wrapper logic for the download container
         const wrapper = createShapeWrapper(imageCircleSize, currentShape, currentImageSrc, dominantColor);
-        // Adjust margin for the larger download size
         wrapper.style.margin = `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0`;
         
         tempContainer.appendChild(wrapper);
@@ -289,7 +290,7 @@ async function downloadWithSize(width, height) {
         
         document.body.appendChild(tempContainer);
         
-        // Allow DOM to settle
+        // Allow DOM to settle and paint
         await new Promise(resolve => setTimeout(resolve, 500));
         
         const dataUrl = await htmlToImage.toPng(tempContainer, {
