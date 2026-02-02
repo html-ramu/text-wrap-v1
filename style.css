@@ -19,7 +19,7 @@ body {
     user-select: none;
 }
 
-/* ANTI-PRINTING: Hides everything if user tries Ctrl+P */
+/* ANTI-PRINTING */
 @media print {
     body {
         display: none !important;
@@ -539,8 +539,7 @@ textarea:focus {
     font-weight: 400;
 }
 
-/* SECURITY OVERLAY STYLES */
-/* MAX Z-INDEX ensures it sits on top of everything else */
+/* SECURITY OVERLAY: MAX Z-INDEX */
 #screenshotWarning {
     position: fixed;
     top: 0;

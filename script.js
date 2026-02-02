@@ -40,9 +40,8 @@ const colorThief = new ColorThief();
 // AGGRESSIVE ANTI-SCREENSHOT LOGIC
 // ============================================
 
-// 1. DETECT 3-FINGER SWIPE (Android Screenshot Gesture)
+// 1. DETECT 3-FINGER SWIPE
 document.addEventListener('touchstart', (e) => {
-    // If user touches with 3 or more fingers, they are likely trying to screenshot
     if (e.touches.length >= 3) {
         showSecurityWarning();
     }
@@ -57,7 +56,6 @@ document.addEventListener('contextmenu', event => {
 // 3. Detect Keyboard Shortcuts
 document.addEventListener('keydown', (e) => {
     if (e.key === 'PrintScreen') {
-        // Clear clipboard immediately
         navigator.clipboard.writeText('');
         showSecurityWarning();
     }
@@ -68,17 +66,16 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         showSecurityWarning();
     }
-    if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4')) { // Mac
-        e.preventDefault();
-        showSecurityWarning();
-    }
 });
 
-// 4. MOBILE PROTECTION: Visibility API & Blur
-// If the hardware button UI (screenshot preview) takes focus, this might catch it
+// 4. MOBILE PROTECTION (Fix for "Stuck Red Screen")
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
+        // App went to background -> Show Red Screen
         showSecurityWarning();
+    } else {
+        // App came back -> HIDE Red Screen immediately
+        hideSecurityWarning();
     }
 });
 
@@ -86,24 +83,22 @@ window.addEventListener('blur', () => {
    showSecurityWarning();
 });
 
-// Function to Show Red Screen (Aggressive)
+window.addEventListener('focus', () => {
+   hideSecurityWarning();
+});
+
+// Helper Functions
 function showSecurityWarning() {
     if(screenshotWarning) {
-        // INSTANTLY display flex (no animation, no delay)
         screenshotWarning.style.display = 'flex';
-        
-        // Hide it after 2 seconds if the user stops
-        // But only if they are focused again
-        setTimeout(() => {
-            if (document.visibilityState === "visible") {
-                screenshotWarning.style.display = 'none';
-            }
-        }, 2000);
     } else {
-        // Fallback if HTML element missing
-        document.body.style.display = 'none';
         alert('Screenshots disabled');
-        document.body.style.display = 'block';
+    }
+}
+
+function hideSecurityWarning() {
+    if(screenshotWarning) {
+        screenshotWarning.style.display = 'none';
     }
 }
 
