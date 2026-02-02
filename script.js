@@ -1,460 +1,684 @@
-// DOM ELEMENTS
+// Get all DOM elements
 const imageUpload = document.getElementById('imageUpload');
-const textCircleModeBtn = document.getElementById('textCircleModeBtn');
-const imageControlsArea = document.getElementById('imageControlsArea');
-const commonControls = document.getElementById('commonControls');
 const previewImg = document.getElementById('previewImg');
+const imagePreview = document.getElementById('imagePreview');
+const noImageText = imagePreview.querySelector('.no-image');
+const addButtons = document.querySelector('.add-buttons');
+
+// Buttons
+const addToCircleBtn = document.getElementById('addToCircleBtn');
+const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
+const addToFlowerBtn = document.getElementById('addToFlowerBtn');
+const mainTextCircleBtn = document.getElementById('mainTextCircleBtn'); // NEW
+
+// Content Inputs
+const teluguText = document.getElementById('teluguText');
+const imageSize = document.getElementById('imageSize');
+const sizeValue = document.getElementById('sizeValue');
 const resultContainer = document.getElementById('resultContainer');
+
+// Download & Modal
 const downloadBtn = document.getElementById('downloadBtn');
+const sizeModal = document.getElementById('sizeModal');
+const closeModal = document.getElementById('closeModal');
+const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
 const screenshotWarning = document.getElementById('screenshotWarning');
 
-// Buttons & Inputs
+// Control Sections
+const imageAdjustControl = document.getElementById('imageAdjustControl');
+const borderColorControl = document.getElementById('borderColorControl');
+const positionControl = document.getElementById('positionControl');
+const sizeControl = document.getElementById('sizeControl'); // Added ID in HTML
+const shapeBorderColor = document.getElementById('shapeBorderColor');
+const textColor = document.getElementById('textColor');
+const circleTextSection = document.getElementById('circleTextSection');
+const circleTextInput = document.getElementById('circleTextInput');
+const circleTextColor = document.getElementById('circleTextColor');
+const circleBorderColor = document.getElementById('circleBorderColor');
+
+// Background Color (NEW)
+const bgColorInput = document.getElementById('bgColor');
+
+// Position buttons
+const moveUp = document.getElementById('moveUp');
+const moveDown = document.getElementById('moveDown');
+const moveLeft = document.getElementById('moveLeft');
+const moveRight = document.getElementById('moveRight');
+const zoomIn = document.getElementById('zoomIn');
+const zoomOut = document.getElementById('zoomOut');
+const resetPosition = document.getElementById('resetPosition');
+
+// Position toggles
 const posLeftBtn = document.getElementById('posLeftBtn');
 const posRightBtn = document.getElementById('posRightBtn');
-const borderColorPicker = document.getElementById('borderColorPicker');
-const textColorPicker = document.getElementById('textColorPicker');
-const bgColorPicker = document.getElementById('bgColorPicker');
-const imageSizeSlider = document.getElementById('imageSizeSlider');
-const teluguText = document.getElementById('teluguText');
 
-// Adjust Controls
-let imgScale = 1;
-let imgX = 0;
-let imgY = 0;
-
-// STATE
-let currentMode = null; // 'image' or 'textCircle'
-let currentShape = 'circle';
+// Store current state
 let currentImageSrc = null;
-let currentPos = 'left';
+let currentShape = null;
 let currentSize = 150;
-let currentBorderColor = '#FFD700';
-let currentTextColor = '#000000';
-let currentBgColor = '#ffffff';
-let currentTextSizeClass = 'medium'; // small, medium, large, xl
-let dominantColor = '#667eea'; // fallback
+let currentTextSize = 0.85;
+let currentTextColor = '#333333';
+let currentBorderColor = '#8B6914';
+let currentPosition = 'left';
+let currentBackgroundColor = '#ffffff';
 
-// POLYGONS
-const hexPoly = 'polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%)';
+// Text Circle State
+let currentCircleText = 'TELUGU TEXT WRAPPER';
+let currentCircleTextColor = '#8B6914';
+let currentCircleTextSize = 18;
+let currentCircleBorderColor = '#8B6914';
+
+let warningTimeout = null;
+
+// Image adjustment state
+let imageOffsetX = 0;
+let imageOffsetY = 0;
+let imageZoom = 1;
+
+// POLYGON STRINGS
+const hexadecagonPoly = 'polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%)';
 const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%)';
-const simpleCornerLeft = 'polygon(0 0, 100% 0, 50% 0, 15% 15%, 0 50%, 15% 85%, 50% 100%, 100% 100%, 0 100%)';
-const simpleCornerRight = 'polygon(100% 0, 0 0, 50% 0, 85% 15%, 100% 50%, 85% 85%, 50% 100%, 0 100%, 100% 100%)';
 
-// ===================================
-// 1. INITIALIZATION & MODE SWITCHING
-// ===================================
+// Initialize ColorThief
+const colorThief = new ColorThief();
 
-imageUpload.addEventListener('change', (e) => {
+// ============================================
+// ANTI-SCREENSHOT PROTECTION
+// ============================================
+
+document.addEventListener('touchstart', (e) => {
+    if (e.touches.length >= 3) {
+        e.preventDefault();
+        showSecurityWarning();
+    }
+}, { passive: false });
+
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
+    showSecurityWarning();
+});
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'PrintScreen') {
+        navigator.clipboard.writeText('');
+        showSecurityWarning();
+    }
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
+        showSecurityWarning();
+    }
+    if (e.ctrlKey && ['p', 's', 'u', 'c'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
+        showSecurityWarning();
+    }
+});
+
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+        showSecurityWarning();
+    } else {
+        hideSecurityWarning();
+    }
+});
+
+window.addEventListener('blur', () => showSecurityWarning());
+window.addEventListener('focus', () => hideSecurityWarning());
+
+function showSecurityWarning() {
+    if (screenshotWarning) {
+        screenshotWarning.style.display = 'flex';
+        clearTimeout(warningTimeout);
+        warningTimeout = setTimeout(() => hideSecurityWarning(), 2000);
+    }
+}
+
+function hideSecurityWarning() {
+    if (screenshotWarning) {
+        screenshotWarning.style.display = 'none';
+    }
+    clearTimeout(warningTimeout);
+}
+
+// ============================================
+// IMAGE UPLOAD
+// ============================================
+
+imageUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
-    if (file) {
+    
+    if (file && file.type.startsWith('image/')) {
         const reader = new FileReader();
-        reader.onload = (ev) => {
-            currentImageSrc = ev.target.result;
+        
+        reader.onload = function(event) {
+            currentImageSrc = event.target.result;
             previewImg.src = currentImageSrc;
-            setMode('image');
+            previewImg.classList.add('visible');
+            noImageText.classList.add('hidden');
+            addButtons.style.display = 'flex';
+            
+            // Switch to circle default when image uploaded
+            setShape('circle');
+
+            previewImg.onload = function() {
+                try {
+                    const color = colorThief.getColor(previewImg);
+                    currentBorderColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    shapeBorderColor.value = rgbToHex(color[0], color[1], color[2]);
+                } catch (error) {
+                    console.warn('Color extraction failed');
+                    currentBorderColor = '#8B6914';
+                }
+            };
         };
+        
         reader.readAsDataURL(file);
     }
 });
 
-textCircleModeBtn.addEventListener('click', () => {
-    setMode('textCircle');
+function rgbToHex(r, g, b) {
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// ============================================
+// SHAPE SELECTION
+// ============================================
+
+// Shape buttons (dependent on image)
+addToCircleBtn.addEventListener('click', () => setShape('circle'));
+addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon'));
+addToFlowerBtn.addEventListener('click', () => setShape('flower'));
+
+// Main Text Circle Button (independent)
+mainTextCircleBtn.addEventListener('click', () => {
+    setShape('text-circle');
 });
 
-function setMode(mode) {
-    currentMode = mode;
-    commonControls.style.display = 'block';
+function setShape(shape) {
+    currentShape = shape;
+    resetImageAdjustment();
     
-    if (mode === 'image') {
-        imageControlsArea.style.display = 'block';
-        document.getElementById('posControlGroup').style.display = 'block'; // Show Left/Right
-        currentShape = 'circle'; // Default
-        resetImageAdjust();
+    // UI Logic: Show/Hide sections based on mode
+    if (shape === 'text-circle') {
+        // Hide image-specifics
+        imageAdjustControl.style.display = 'none';
+        borderColorControl.style.display = 'none';
+        
+        // Show Text Circle specifics
+        circleTextSection.style.display = 'block';
+        
+        // Ensure size and position controls are visible
+        sizeControl.style.display = 'block';
+        positionControl.style.display = 'block';
+        
     } else {
-        imageControlsArea.style.display = 'none';
-        document.getElementById('posControlGroup').style.display = 'none'; // Always center
-        currentShape = 'textCircle';
+        // Image Mode
+        if (!currentImageSrc) {
+            alert("Please upload an image first!");
+            return;
+        }
+        imageAdjustControl.style.display = 'block';
+        borderColorControl.style.display = 'block';
+        circleTextSection.style.display = 'none';
+        sizeControl.style.display = 'block';
+        positionControl.style.display = 'block';
     }
+    
     updatePreview();
 }
 
-// ===================================
-// 2. CONTROLS (Colors, Size, Position)
-// ===================================
+// ============================================
+// IMAGE POSITION ADJUSTMENT
+// ============================================
 
-// Position
-posLeftBtn.addEventListener('click', () => { currentPos = 'left'; updatePosUI(); updatePreview(); });
-posRightBtn.addEventListener('click', () => { currentPos = 'right'; updatePosUI(); updatePreview(); });
+moveUp.addEventListener('click', () => { imageOffsetY -= 5; updatePreview(); });
+moveDown.addEventListener('click', () => { imageOffsetY += 5; updatePreview(); });
+moveLeft.addEventListener('click', () => { imageOffsetX -= 5; updatePreview(); });
+moveRight.addEventListener('click', () => { imageOffsetX += 5; updatePreview(); });
+zoomIn.addEventListener('click', () => { imageZoom += 0.1; updatePreview(); });
+zoomOut.addEventListener('click', () => { 
+    imageZoom -= 0.1; 
+    if (imageZoom < 0.5) imageZoom = 0.5; 
+    updatePreview(); 
+});
+resetPosition.addEventListener('click', () => { resetImageAdjustment(); updatePreview(); });
 
-function updatePosUI() {
-    document.querySelectorAll('#posControlGroup .toggle-btn').forEach(b => b.classList.remove('active'));
-    if(currentPos === 'left') posLeftBtn.classList.add('active');
-    else posRightBtn.classList.add('active');
+function resetImageAdjustment() {
+    imageOffsetX = 0;
+    imageOffsetY = 0;
+    imageZoom = 1;
 }
 
-// Shape Selection
-document.getElementById('addToCircleBtn').addEventListener('click', () => { currentShape = 'circle'; updatePreview(); });
-document.getElementById('addToHexadecagonBtn').addEventListener('click', () => { currentShape = 'hexadecagon'; updatePreview(); });
-document.getElementById('addToFlowerBtn').addEventListener('click', () => { currentShape = 'flower'; updatePreview(); });
+// ============================================
+// COLOR CONTROLS
+// ============================================
 
-// Border Color
-borderColorPicker.addEventListener('input', (e) => { currentBorderColor = e.target.value; updatePreview(); });
+shapeBorderColor.addEventListener('input', (e) => {
+    currentBorderColor = e.target.value;
+    updatePreview();
+});
+
+textColor.addEventListener('input', (e) => {
+    currentTextColor = e.target.value;
+    updatePreview();
+});
+
+bgColorInput.addEventListener('input', (e) => {
+    currentBackgroundColor = e.target.value;
+    updatePreview();
+});
+
+// Circle Text Colors
+circleTextColor.addEventListener('input', (e) => {
+    currentCircleTextColor = e.target.value;
+    updatePreview();
+});
+circleBorderColor.addEventListener('input', (e) => {
+    currentCircleBorderColor = e.target.value;
+    updatePreview();
+});
+
+// Generic Color Preset Handler
 document.querySelectorAll('.color-preset').forEach(btn => {
-    if(btn.classList.contains('text-preset')) return; // skip text presets
-    btn.addEventListener('click', () => {
-        currentBorderColor = btn.dataset.color;
-        borderColorPicker.value = currentBorderColor;
+    btn.addEventListener('click', function() {
+        const color = this.dataset.color;
+        const target = this.dataset.target;
+        
+        if (target === 'circleTextColor') {
+            circleTextColor.value = color;
+            currentCircleTextColor = color;
+        } else if (target === 'circleBorderColor') {
+            circleBorderColor.value = color;
+            currentCircleBorderColor = color;
+        } else if (target === 'bgColor') {
+            bgColorInput.value = color;
+            currentBackgroundColor = color;
+        } else if (this.closest('#borderColorControl')) {
+            shapeBorderColor.value = color;
+            currentBorderColor = color;
+        } else {
+            textColor.value = color;
+            currentTextColor = color;
+        }
+        
         updatePreview();
     });
 });
 
-// Text Color
-textColorPicker.addEventListener('input', (e) => { currentTextColor = e.target.value; updatePreview(); });
-document.querySelectorAll('.text-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-        currentTextColor = btn.dataset.color;
-        textColorPicker.value = currentTextColor;
-        updatePreview();
-    });
-});
+// ============================================
+// POSITION TOGGLE
+// ============================================
 
-// Background Color
-bgColorPicker.addEventListener('input', (e) => { currentBgColor = e.target.value; updatePreview(); });
-document.querySelectorAll('.bg-preset').forEach(btn => {
-    btn.addEventListener('click', () => {
-        currentBgColor = btn.dataset.color;
-        bgColorPicker.value = currentBgColor;
-        updatePreview();
-    });
-});
-
-// Text Size
-document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        currentTextSizeClass = btn.dataset.size;
-        updatePreview();
-    });
-});
-
-// Shape Size
-document.querySelectorAll('.shape-size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        currentSize = parseInt(btn.dataset.size);
-        imageSizeSlider.value = currentSize;
-        updatePreview();
-    });
-});
-imageSizeSlider.addEventListener('input', (e) => {
-    currentSize = e.target.value;
+posLeftBtn.addEventListener('click', () => {
+    currentPosition = 'left';
+    posLeftBtn.classList.add('active');
+    posRightBtn.classList.remove('active');
     updatePreview();
 });
 
-// Text Input
+posRightBtn.addEventListener('click', () => {
+    currentPosition = 'right';
+    posRightBtn.classList.add('active');
+    posLeftBtn.classList.remove('active');
+    updatePreview();
+});
+
+// ============================================
+// SIZE CONTROLS
+// ============================================
+
+imageSize.addEventListener('input', function(e) {
+    currentSize = parseInt(e.target.value);
+    sizeValue.textContent = currentSize + 'px';
+    document.querySelectorAll('.size-preset').forEach(btn => btn.classList.remove('active'));
+    updatePreview();
+});
+
+document.querySelectorAll('.size-preset').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentSize = parseInt(this.dataset.size);
+        imageSize.value = currentSize;
+        sizeValue.textContent = currentSize + 'px';
+        document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        updatePreview();
+    });
+});
+
+// ============================================
+// TEXT & FONT CONTROLS
+// ============================================
+
+document.querySelectorAll('.text-size-preset').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentTextSize = parseFloat(this.dataset.size);
+        document.querySelectorAll('.text-size-preset').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        updatePreview();
+    });
+});
+
+circleTextInput.addEventListener('input', (e) => {
+    currentCircleText = e.target.value;
+    updatePreview();
+});
+
+document.querySelectorAll('.circle-text-size-preset').forEach(btn => {
+    btn.addEventListener('click', function() {
+        currentCircleTextSize = parseInt(this.dataset.size);
+        document.querySelectorAll('.circle-text-size-preset').forEach(b => b.classList.remove('active'));
+        this.classList.add('active');
+        updatePreview();
+    });
+});
+
 teluguText.addEventListener('input', updatePreview);
 
-// ===================================
-// 3. IMAGE ADJUSTMENT (Zoom/Move)
-// ===================================
-document.getElementById('zoomIn').addEventListener('click', () => { imgScale += 0.1; updatePreview(); });
-document.getElementById('zoomOut').addEventListener('click', () => { imgScale = Math.max(0.1, imgScale - 0.1); updatePreview(); });
-document.getElementById('moveUp').addEventListener('click', () => { imgY -= 10; updatePreview(); });
-document.getElementById('moveDown').addEventListener('click', () => { imgY += 10; updatePreview(); });
-document.getElementById('moveLeft').addEventListener('click', () => { imgX -= 10; updatePreview(); });
-document.getElementById('moveRight').addEventListener('click', () => { imgX += 10; updatePreview(); });
-document.getElementById('resetAdjust').addEventListener('click', resetImageAdjust);
-
-function resetImageAdjust() {
-    imgScale = 1; imgX = 0; imgY = 0;
-    updatePreview();
-}
-
-// ===================================
-// 4. RENDERING LOGIC
-// ===================================
+// ============================================
+// UPDATE PREVIEW
+// ============================================
 
 function updatePreview() {
-    if (!currentMode) return;
+    const text = teluguText.value.trim();
     
-    // Apply Background Color
-    resultContainer.style.backgroundColor = currentBgColor;
-    resultContainer.innerHTML = ''; // Clear
-
-    // Apply Text Color & Size to Container
-    resultContainer.style.color = currentTextColor;
-    // Map size classes to approx pixel values for preview logic if needed, 
-    // but mostly handled via CSS class on the container or element
-    let fontSize = '16px';
-    if(currentTextSizeClass === 'small') fontSize = '12px';
-    if(currentTextSizeClass === 'medium') fontSize = '16px';
-    if(currentTextSizeClass === 'large') fontSize = '20px';
-    if(currentTextSizeClass === 'xl') fontSize = '24px';
-    resultContainer.style.fontSize = fontSize;
-
-
-    if (currentMode === 'textCircle') {
-        renderTextCircle();
-    } else {
-        renderImageWrap();
+    // Apply background color
+    resultContainer.style.backgroundColor = currentBackgroundColor;
+    
+    if (!currentShape) {
+        resultContainer.innerHTML = '<p class="placeholder">Choose Image or Text Circle to start</p>';
+        downloadBtn.style.display = 'none';
+        return;
     }
     
-    downloadBtn.disabled = false;
+    if (currentShape === 'text-circle') {
+        createShapePreview(text, true); // true = text circle mode
+    } else {
+        createShapePreview(text, false);
+    }
+    
+    downloadBtn.style.display = 'block';
 }
 
-function renderTextCircle() {
-    // Spacers to force circle shape
-    const leftSpacer = document.createElement('div');
-    leftSpacer.style.float = 'left';
-    leftSpacer.style.width = '50%';
-    leftSpacer.style.height = '100%';
-    leftSpacer.style.shapeOutside = simpleCornerLeft;
+function createShapePreview(text, isTextCircle) {
+    if (!text && !isTextCircle) {
+        resultContainer.innerHTML = '<p class="placeholder">Enter body text to see preview</p>';
+        return;
+    }
     
-    const rightSpacer = document.createElement('div');
-    rightSpacer.style.float = 'right';
-    rightSpacer.style.width = '50%';
-    rightSpacer.style.height = '100%';
-    rightSpacer.style.shapeOutside = simpleCornerRight;
-
-    // Circle Container
-    const circleDiv = document.createElement('div');
-    circleDiv.style.width = currentSize + 'px';
-    circleDiv.style.height = currentSize + 'px';
-    circleDiv.style.borderRadius = '50%';
-    circleDiv.style.border = `4px solid ${currentBorderColor}`;
-    circleDiv.style.margin = '0 auto';
-    circleDiv.style.overflow = 'hidden';
-    circleDiv.style.textAlign = 'center';
-    circleDiv.style.position = 'relative';
+    let wrapper;
+    if (isTextCircle) {
+        // Generate SVG for text circle
+        const svgContent = createCircleTextSVG(
+            currentCircleText || 'TELUGU TEXT WRAPPER', 
+            currentSize, 
+            currentCircleTextColor, 
+            currentCircleTextSize, 
+            currentCircleBorderColor
+        );
+        wrapper = document.createElement('div');
+        wrapper.innerHTML = svgContent;
+        // Float handling
+        wrapper.style.float = currentPosition;
+        wrapper.style.margin = currentPosition === 'left' ? '0 15px 10px 0' : '0 0 10px 15px';
+        // Shape outside for text wrapping
+        wrapper.style.width = currentSize + 'px';
+        wrapper.style.height = currentSize + 'px';
+        wrapper.style.shapeOutside = 'circle(50%)';
+        wrapper.style.borderRadius = '50%';
+    } else {
+        // Generate Image Shape
+        wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, currentBorderColor);
+        wrapper.style.float = currentPosition;
+        wrapper.style.margin = currentPosition === 'left' ? '0 15px 10px 0' : '0 0 10px 15px';
+    }
     
-    // Adjust font size relative to circle size + selection
-    // Base scale factor
-    let scale = 1; 
-    if(currentTextSizeClass === 'small') scale = 0.8;
-    if(currentTextSizeClass === 'large') scale = 1.2;
-    if(currentTextSizeClass === 'xl') scale = 1.4;
+    const textNode = document.createElement('span');
+    textNode.textContent = text;
+    textNode.style.color = currentTextColor;
+    textNode.style.fontSize = currentTextSize + 'em';
     
-    circleDiv.style.fontSize = (currentSize / 15 * scale) + 'px';
-    circleDiv.style.color = currentTextColor;
-
-    circleDiv.appendChild(leftSpacer);
-    circleDiv.appendChild(rightSpacer);
-    
-    const textSpan = document.createElement('span');
-    textSpan.textContent = teluguText.value;
-    circleDiv.appendChild(textSpan);
-
-    resultContainer.appendChild(circleDiv);
+    resultContainer.innerHTML = '';
+    resultContainer.appendChild(wrapper);
+    resultContainer.appendChild(textNode);
 }
 
-function renderImageWrap() {
-    const wrapper = document.createElement('div');
+function createShapeWrapper(size, shape, src, borderColor) {
+    const outerDiv = document.createElement('div');
+    const innerDiv = document.createElement('div');
     const img = document.createElement('img');
     
-    wrapper.style.width = currentSize + 'px';
-    wrapper.style.height = currentSize + 'px';
-    wrapper.style.backgroundColor = currentBorderColor; // The "Border" is essentially the background
-    // Create a slight padding to show the border color
-    wrapper.style.display = 'flex';
-    wrapper.style.justifyContent = 'center';
-    wrapper.style.alignItems = 'center';
+    outerDiv.style.width = size + 'px';
+    outerDiv.style.height = size + 'px';
+    outerDiv.style.background = borderColor;
+    outerDiv.style.display = 'flex';
+    outerDiv.style.justifyContent = 'center';
+    outerDiv.style.alignItems = 'center';
+    outerDiv.style.position = 'relative';
+    outerDiv.style.overflow = 'hidden'; // Important for zoom
     
-    // Position Logic
-    wrapper.style.float = currentPos;
-    if (currentPos === 'left') wrapper.style.margin = '0 15px 5px 0';
-    else wrapper.style.margin = '0 0 5px 15px';
-
-    // Shape Logic
-    let clipStyle = '';
-    if (currentShape === 'circle') {
-        wrapper.style.borderRadius = '50%';
-        wrapper.style.shapeOutside = 'circle(50%)';
-        img.style.borderRadius = '50%';
-    } else {
-        const poly = currentShape === 'hexadecagon' ? hexPoly : flowerPoly;
-        wrapper.style.clipPath = poly;
-        wrapper.style.shapeOutside = poly;
-        img.style.clipPath = poly;
-    }
-
-    // Image Styling (Adjustments)
-    img.src = currentImageSrc;
-    img.style.width = '100%'; 
+    innerDiv.style.width = '92%';
+    innerDiv.style.height = '92%';
+    innerDiv.style.position = 'relative';
+    innerDiv.style.overflow = 'hidden';
+    
+    img.src = src;
+    img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
-    // Apply Zoom & Move transform
-    // Scale slightly down (0.92) to reveal border, then apply user transform
-    img.style.transform = `scale(${0.92 * imgScale}) translate(${imgX}px, ${imgY}px)`;
+    img.style.transform = `translate(${imageOffsetX}%, ${imageOffsetY}%) scale(${imageZoom})`;
+    img.style.transition = 'transform 0.2s';
+    img.crossOrigin = 'anonymous';
     
-    wrapper.appendChild(img);
-    resultContainer.appendChild(wrapper);
-    resultContainer.appendChild(document.createTextNode(teluguText.value));
+    if (shape === 'circle') {
+        outerDiv.style.borderRadius = '50%';
+        outerDiv.style.shapeOutside = 'circle(50%)';
+        innerDiv.style.borderRadius = '50%';
+        img.style.borderRadius = '50%';
+    } else {
+        const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
+        outerDiv.style.clipPath = poly;
+        outerDiv.style.shapeOutside = poly;
+        innerDiv.style.clipPath = poly;
+        img.style.clipPath = poly;
+    }
+    
+    innerDiv.appendChild(img);
+    outerDiv.appendChild(innerDiv);
+    return outerDiv;
 }
 
-// ===================================
-// 5. DOWNLOAD LOGIC
-// ===================================
+// Fixed calculation to prevent disturbance
+function createCircleTextSVG(text, size, textColor, textSize, borderColor) {
+    const radius = size / 2;
+    // Make text radius proportional (82% of radius) to scale correctly with size
+    const textRadius = radius * 0.82; 
+    
+    // Scale stroke width slightly with size, min 2px max 8px
+    const strokeWidth = Math.max(2, Math.min(8, size * 0.02));
 
-const sizeModal = document.getElementById('sizeModal');
-const closeModal = document.getElementById('closeModal');
+    return `
+        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <path id="circlePath" d="M ${radius},${radius} m -${textRadius},0 a ${textRadius},${textRadius} 0 1,1 ${textRadius * 2},0 a ${textRadius},${textRadius} 0 1,1 -${textRadius * 2},0"/>
+            </defs>
+            <circle cx="${radius}" cy="${radius}" r="${radius * 0.95}" fill="none" stroke="${borderColor}" stroke-width="${strokeWidth}"/>
+            <text font-family="Noto Sans Telugu, sans-serif" font-size="${textSize}" font-weight="700" fill="${textColor}">
+                <textPath href="#circlePath" startOffset="50%" text-anchor="middle">
+                    ${text}
+                </textPath>
+            </text>
+        </svg>
+    `;
+}
 
-downloadBtn.addEventListener('click', () => sizeModal.style.display = 'flex');
-closeModal.addEventListener('click', () => sizeModal.style.display = 'none');
-window.addEventListener('click', (e) => { if(e.target === sizeModal) sizeModal.style.display = 'none'; });
+// ============================================
+// MODAL HANDLING
+// ============================================
 
-document.querySelectorAll('.size-option-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        const type = btn.dataset.type;
-        const width = btn.dataset.width ? parseInt(btn.dataset.width) : null;
-        const height = btn.dataset.height ? parseInt(btn.dataset.height) : null;
-        sizeModal.style.display = 'none';
+downloadBtn.addEventListener('click', () => sizeModal.classList.add('show'));
+closeModal.addEventListener('click', () => sizeModal.classList.remove('show'));
+
+sizeModal.addEventListener('click', (e) => {
+    if (e.target === sizeModal) {
+        sizeModal.classList.remove('show');
+    }
+});
+
+// ============================================
+// DOWNLOAD LOGIC
+// ============================================
+
+sizeOptionBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+        const type = this.dataset.type;
+        sizeModal.classList.remove('show');
         
-        if (type === 'auto') downloadImage(null, null, true);
-        else downloadImage(width, height, false);
+        if (type === 'auto') {
+            downloadAutoSize();
+        } else {
+            const width = parseInt(this.dataset.width);
+            const height = parseInt(this.dataset.height);
+            downloadWithSize(width, height);
+        }
     });
 });
 
-async function downloadImage(width, height, isAuto) {
-    downloadBtn.textContent = 'Processing...';
+async function downloadAutoSize() {
     downloadBtn.disabled = true;
-
+    downloadBtn.textContent = 'Processing...';
+    
     try {
-        await new Promise(r => setTimeout(r, 200));
-
-        let nodeToCapture = resultContainer;
-        let tempContainer = null;
-
-        // If specific size requested, create a temporary container
-        if (!isAuto) {
-            tempContainer = document.createElement('div');
-            tempContainer.style.width = width + 'px';
-            tempContainer.style.height = height + 'px';
-            tempContainer.style.backgroundColor = currentBgColor;
-            tempContainer.style.color = currentTextColor;
-            tempContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
-            tempContainer.style.padding = '40px';
-            tempContainer.style.position = 'fixed';
-            tempContainer.style.left = '-9999px';
-            tempContainer.style.top = '0';
-            
-            // Calculate Font Size for Download based on selection
-            let fs = 16;
-            if(currentTextSizeClass === 'small') fs = width * 0.015;
-            if(currentTextSizeClass === 'medium') fs = width * 0.022;
-            if(currentTextSizeClass === 'large') fs = width * 0.030;
-            if(currentTextSizeClass === 'xl') fs = width * 0.040;
-            tempContainer.style.fontSize = fs + 'px';
-
-            if (currentMode === 'textCircle') {
-                // Scale Circle for Download
-                const scaleRatio = width / 800; // arbitrary base
-                const dlSize = currentSize * scaleRatio * 1.5; 
-                
-                // Recreate circle structure
-                const circleDiv = document.createElement('div');
-                circleDiv.style.width = dlSize + 'px';
-                circleDiv.style.height = dlSize + 'px';
-                circleDiv.style.borderRadius = '50%';
-                circleDiv.style.border = `5px solid ${currentBorderColor}`;
-                circleDiv.style.margin = '0 auto';
-                circleDiv.style.textAlign = 'center';
-                circleDiv.style.position = 'relative';
-                // Center in container
-                tempContainer.style.display = 'flex';
-                tempContainer.style.justifyContent = 'center';
-                tempContainer.style.alignItems = 'center';
-
-                // Spacers
-                const ls = document.createElement('div');
-                ls.style.float = 'left'; ls.style.width = '50%'; ls.style.height = '100%'; ls.style.shapeOutside = simpleCornerLeft;
-                const rs = document.createElement('div');
-                rs.style.float = 'right'; rs.style.width = '50%'; rs.style.height = '100%'; rs.style.shapeOutside = simpleCornerRight;
-                
-                let fontScale = 1; 
-                if(currentTextSizeClass === 'small') fontScale = 0.8;
-                if(currentTextSizeClass === 'xl') fontScale = 1.4;
-                circleDiv.style.fontSize = (dlSize / 15 * fontScale) + 'px';
-                circleDiv.style.color = currentTextColor;
-
-                circleDiv.appendChild(ls);
-                circleDiv.appendChild(rs);
-                const span = document.createElement('span');
-                span.textContent = teluguText.value;
-                circleDiv.appendChild(span);
-                tempContainer.appendChild(circleDiv);
-
-            } else {
-                // Image Wrap Mode
-                // Scale Image
-                const dlImgSize = Math.min(width, height) * 0.35;
-                const wrapper = document.createElement('div');
-                const img = document.createElement('img');
-                
-                wrapper.style.width = dlImgSize + 'px';
-                wrapper.style.height = dlImgSize + 'px';
-                wrapper.style.backgroundColor = currentBorderColor;
-                wrapper.style.display = 'flex';
-                wrapper.style.justifyContent = 'center';
-                wrapper.style.alignItems = 'center';
-                wrapper.style.float = currentPos;
-                
-                // Margins
-                const marginSize = width * 0.02;
-                if (currentPos === 'left') wrapper.style.margin = `0 ${marginSize}px ${marginSize}px 0`;
-                else wrapper.style.margin = `0 0 ${marginSize}px ${marginSize}px`;
-
-                let clipStyle = '';
-                if (currentShape === 'circle') {
-                    wrapper.style.borderRadius = '50%';
-                    wrapper.style.shapeOutside = 'circle(50%)';
-                    img.style.borderRadius = '50%';
-                } else {
-                    const poly = currentShape === 'hexadecagon' ? hexPoly : flowerPoly;
-                    wrapper.style.clipPath = poly;
-                    wrapper.style.shapeOutside = poly;
-                    img.style.clipPath = poly;
-                }
-                
-                img.src = currentImageSrc;
-                img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-                img.style.transform = `scale(${0.92 * imgScale}) translate(${imgX}px, ${imgY}px)`;
-
-                wrapper.appendChild(img);
-                tempContainer.appendChild(wrapper);
-                tempContainer.appendChild(document.createTextNode(teluguText.value));
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        const dataUrl = await htmlToImage.toPng(resultContainer, {
+            backgroundColor: currentBackgroundColor, // Use user selected color
+            pixelRatio: 4,
+            quality: 1,
+            cacheBust: true,
+            style: {
+                fontFamily: "'Noto Sans Telugu', sans-serif"
             }
-
-            document.body.appendChild(tempContainer);
-            nodeToCapture = tempContainer;
-        }
-
-        const dataUrl = await htmlToImage.toPng(nodeToCapture, {
-            backgroundColor: currentBgColor, // Use custom BG
-            pixelRatio: 2
         });
-
-        if(tempContainer) document.body.removeChild(tempContainer);
-
-        const link = document.createElement('a');
-        link.download = `telugu-${Date.now()}.png`;
-        link.href = dataUrl;
-        link.click();
-
-    } catch (err) {
-        console.error(err);
-        alert('Error downloading.');
+        
+        triggerDownload(dataUrl, 'auto');
+        
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert('Download failed. Please try again.');
     } finally {
-        downloadBtn.textContent = '⬇️ Download';
         downloadBtn.disabled = false;
+        downloadBtn.textContent = '⬇️ Download';
     }
 }
 
-// Security: Print Screen Block
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'PrintScreen') {
-        try { navigator.clipboard.writeText(''); } catch(e){}
-        screenshotWarning.style.display = 'flex';
-        setTimeout(() => screenshotWarning.style.display = 'none', 2000);
+async function downloadWithSize(width, height) {
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Processing...';
+    
+    try {
+        const shapeSize = Math.min(width, height) * 0.35;
+        // Scale font proportionally
+        const fontSize = width * 0.024;
+        const scaledTextSize = currentCircleTextSize * (width / 954); // Base scale ref
+        
+        const tempContainer = document.createElement('div');
+        tempContainer.style.cssText = `
+            width: ${width}px;
+            height: ${height}px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: -9999;
+            background: ${currentBackgroundColor}; /* Use user selected color */
+            padding: 40px;
+            box-sizing: border-box;
+            font-family: 'Noto Sans Telugu', sans-serif;
+            font-size: ${fontSize}px;
+            line-height: 1.8;
+            color: ${currentTextColor};
+            text-align: justify;
+        `;
+        
+        let wrapper;
+        const marginStyle = currentPosition === 'left' 
+            ? `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0` 
+            : `0 0 ${fontSize * 0.5}px ${fontSize * 1.2}px`;
+
+        if (currentShape === 'text-circle') {
+            const svg = createCircleTextSVG(
+                currentCircleText || 'TELUGU TEXT WRAPPER', 
+                shapeSize, 
+                currentCircleTextColor, 
+                scaledTextSize, 
+                currentCircleBorderColor
+            );
+            wrapper = document.createElement('div');
+            wrapper.innerHTML = svg;
+            wrapper.style.float = currentPosition;
+            wrapper.style.margin = marginStyle;
+            wrapper.style.width = shapeSize + 'px';
+            wrapper.style.height = shapeSize + 'px';
+            wrapper.style.shapeOutside = 'circle(50%)';
+            // Important for text wrapping in high-res export
+            wrapper.innerHTML = svg;
+        } else {
+            wrapper = createShapeWrapper(shapeSize, currentShape, currentImageSrc, currentBorderColor);
+            wrapper.style.float = currentPosition;
+            wrapper.style.margin = marginStyle;
+        }
+        
+        tempContainer.appendChild(wrapper);
+        
+        // Add text content
+        const textSpan = document.createElement('span');
+        textSpan.textContent = teluguText.value;
+        tempContainer.appendChild(textSpan);
+        
+        document.body.appendChild(tempContainer);
+        
+        // Wait for rendering
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        const dataUrl = await htmlToImage.toPng(tempContainer, {
+            backgroundColor: currentBackgroundColor,
+            width: width,
+            height: height,
+            pixelRatio: 2,
+            quality: 1,
+            cacheBust: true,
+            style: {
+                fontFamily: "'Noto Sans Telugu', sans-serif"
+            }
+        });
+        
+        document.body.removeChild(tempContainer);
+        triggerDownload(dataUrl, `${width}x${height}`);
+        
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert('Download failed. Please try again.');
+    } finally {
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = '⬇️ Download';
+    }
+}
+
+function triggerDownload(dataUrl, suffix) {
+    const link = document.createElement('a');
+    const timestamp = new Date().getTime();
+    link.download = `telugu-text-wrap-${currentShape}-${suffix}-${timestamp}.png`;
+    link.href = dataUrl;
+    link.click();
+}
+
+window.addEventListener('load', () => {
+    if (document.fonts) {
+        document.fonts.ready.then(() => console.log('Fonts loaded'));
     }
 });
-document.addEventListener('contextmenu', e => e.preventDefault());
+
+// Suppress CSS warnings
+const originalError = console.error;
+console.error = function(...args) {
+    if (args[0] && args[0].includes('cssRules')) return;
+    originalError.apply(console, args);
+};
