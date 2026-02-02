@@ -65,35 +65,19 @@ imageUpload.addEventListener('change', function(e) {
     }
 });
 
-// ADD TO CIRCLE BUTTON
-addToCircleBtn.addEventListener('click', function() {
-    if (currentImageSrc) {
-        clearAllShapes();
-        currentShape = 'circle';
-        placeImageInShape(circleZone, 'circle');
-        updatePreview();
-    }
-});
+// ADD TO SHAPE BUTTONS
+addToCircleBtn.addEventListener('click', () => setShape('circle', circleZone));
+addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon', hexadecagonZone));
+addToFlowerBtn.addEventListener('click', () => setShape('flower', flowerZone));
 
-// ADD TO HEXADECAGON BUTTON
-addToHexadecagonBtn.addEventListener('click', function() {
+function setShape(shape, zone) {
     if (currentImageSrc) {
         clearAllShapes();
-        currentShape = 'hexadecagon';
-        placeImageInShape(hexadecagonZone, 'hexadecagon');
+        currentShape = shape;
+        placeImageInShape(zone, shape);
         updatePreview();
     }
-});
-
-// ADD TO FLOWER BUTTON
-addToFlowerBtn.addEventListener('click', function() {
-    if (currentImageSrc) {
-        clearAllShapes();
-        currentShape = 'flower';
-        placeImageInShape(flowerZone, 'flower');
-        updatePreview();
-    }
-});
+}
 
 // Clear all shapes
 function clearAllShapes() {
@@ -188,7 +172,6 @@ sizeModal.addEventListener('click', function(e) {
 sizeOptionBtns.forEach(btn => {
     btn.addEventListener('click', function() {
         const type = this.dataset.type;
-        
         sizeModal.classList.remove('show');
         
         if (type === 'auto') {
@@ -207,45 +190,22 @@ async function downloadAutoSize() {
     downloadBtn.textContent = 'Processing...';
     
     try {
-        await new Promise(resolve => setTimeout(resolve, 100));
+        await new Promise(resolve => setTimeout(resolve, 200));
         
-        const canvas = await html2canvas(resultContainer, {
+        // Use htmlToImage instead of html2canvas
+        const dataUrl = await htmlToImage.toPng(resultContainer, {
             backgroundColor: '#ffffff',
-            scale: 3,
-            logging: false,
-            useCORS: true,
-            allowTaint: true,
-            onclone: function(clonedDoc) {
-                const clonedContainer = clonedDoc.getElementById('resultContainer');
-                if (clonedContainer) {
-                    clonedContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
-                }
+            pixelRatio: 3,
+            style: {
+                fontFamily: "'Noto Sans Telugu', sans-serif"
             }
         });
         
-        canvas.toBlob(function(blob) {
-            if (!blob) {
-                throw new Error('Failed to create image');
-            }
-            
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            const timestamp = new Date().getTime();
-            
-            link.download = `telugu-text-wrap-${currentShape}-auto-${timestamp}.png`;
-            link.href = url;
-            link.click();
-            
-            setTimeout(() => URL.revokeObjectURL(url), 100);
-            
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = '⬇️ Download';
-        }, 'image/png', 0.95);
+        triggerDownload(dataUrl, `auto`);
         
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
-        
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
@@ -264,8 +224,9 @@ async function downloadWithSize(width, height) {
         const tempContainer = document.createElement('div');
         tempContainer.style.width = width + 'px';
         tempContainer.style.height = height + 'px';
-        tempContainer.style.position = 'absolute';
+        tempContainer.style.position = 'fixed'; // Must be fixed to be captured properly off-screen
         tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '0';
         tempContainer.style.background = '#ffffff';
         tempContainer.style.padding = '40px';
         tempContainer.style.boxSizing = 'border-box';
@@ -274,83 +235,71 @@ async function downloadWithSize(width, height) {
         tempContainer.style.lineHeight = '1.8';
         tempContainer.style.color = '#333';
         tempContainer.style.textAlign = 'justify';
-        tempContainer.style.borderRadius = '20px';
         
         const text = teluguText.value;
         let shapeCSS = '';
         
+        // Explicitly set both clip-path and shape-outside with webkit prefixes
         if (currentShape === 'circle') {
-            shapeCSS = 'border-radius: 50%; shape-outside: circle(50%);';
+            shapeCSS = 'border-radius: 50%; shape-outside: circle(50%); -webkit-shape-outside: circle(50%);';
         } else if (currentShape === 'hexadecagon') {
-            shapeCSS = `clip-path: ${hexadecagonPoly}; shape-outside: ${hexadecagonPoly};`;
+            shapeCSS = `clip-path: ${hexadecagonPoly}; -webkit-clip-path: ${hexadecagonPoly}; shape-outside: ${hexadecagonPoly}; -webkit-shape-outside: ${hexadecagonPoly};`;
         } else if (currentShape === 'flower') {
-            shapeCSS = `clip-path: ${flowerPoly}; shape-outside: ${flowerPoly};`;
+            shapeCSS = `clip-path: ${flowerPoly}; -webkit-clip-path: ${flowerPoly}; shape-outside: ${flowerPoly}; -webkit-shape-outside: ${flowerPoly};`;
         }
         
         tempContainer.innerHTML = `
             <img 
                 src="${currentImageSrc}" 
                 style="float: left; 
-                       margin: 0 ${fontSize * 1.2}px ${fontSize * 0.8}px 0; 
+                       margin: 0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0; 
                        ${shapeCSS}
                        width: ${imageCircleSize}px; 
                        height: ${imageCircleSize}px; 
                        border: ${borderWidth}px solid ${dominantColor}; 
-                       object-fit: cover;"
+                       object-fit: cover;
+                       display: block;"
                 alt="${currentShape}">
             ${text}
         `;
         
         document.body.appendChild(tempContainer);
         
+        // Allow DOM to settle
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        const canvas = await html2canvas(tempContainer, {
+        const dataUrl = await htmlToImage.toPng(tempContainer, {
             backgroundColor: '#ffffff',
-            scale: 2,
             width: width,
             height: height,
-            logging: false,
-            useCORS: true,
-            allowTaint: true
+            pixelRatio: 1, // Exact size
+            style: {
+                 fontFamily: "'Noto Sans Telugu', sans-serif"
+            }
         });
         
         document.body.removeChild(tempContainer);
-        
-        canvas.toBlob(function(blob) {
-            if (!blob) {
-                throw new Error('Failed to create image');
-            }
-            
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            const timestamp = new Date().getTime();
-            
-            link.download = `telugu-text-wrap-${currentShape}-${width}x${height}-${timestamp}.png`;
-            link.href = url;
-            link.click();
-            
-            setTimeout(() => URL.revokeObjectURL(url), 100);
-            
-            downloadBtn.disabled = false;
-            downloadBtn.textContent = '⬇️ Download';
-        }, 'image/png', 0.95);
+        triggerDownload(dataUrl, `${width}x${height}`);
         
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
-        
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
 }
 
-// MOBILE: Tap to upload
-imagePreview.addEventListener('click', function(e) {
-    if (!e.target.closest('.add-buttons') && !previewImg.classList.contains('visible')) {
-        imageUpload.click();
-    }
-});
+function triggerDownload(dataUrl, suffix) {
+    const link = document.createElement('a');
+    const timestamp = new Date().getTime();
+    
+    link.download = `telugu-text-wrap-${currentShape}-${suffix}-${timestamp}.png`;
+    link.href = dataUrl;
+    link.click();
+    
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = '⬇️ Download';
+}
 
 // ENSURE FONTS ARE LOADED
 window.addEventListener('load', function() {
