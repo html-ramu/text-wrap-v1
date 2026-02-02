@@ -21,6 +21,7 @@ const downloadBtn = document.getElementById('downloadBtn');
 const sizeModal = document.getElementById('sizeModal');
 const closeModal = document.getElementById('closeModal');
 const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
+const screenshotWarning = document.getElementById('screenshotWarning');
 
 // Store current state
 let currentImageSrc = null;
@@ -34,6 +35,81 @@ const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 7
 
 // Initialize ColorThief
 const colorThief = new ColorThief();
+
+// ============================================
+// AGGRESSIVE ANTI-SCREENSHOT LOGIC
+// ============================================
+
+// 1. DETECT 3-FINGER SWIPE (Android Screenshot Gesture)
+document.addEventListener('touchstart', (e) => {
+    // If user touches with 3 or more fingers, they are likely trying to screenshot
+    if (e.touches.length >= 3) {
+        showSecurityWarning();
+    }
+}, { passive: false });
+
+// 2. Disable Right Click
+document.addEventListener('contextmenu', event => {
+    event.preventDefault();
+    showSecurityWarning();
+});
+
+// 3. Detect Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'PrintScreen') {
+        // Clear clipboard immediately
+        navigator.clipboard.writeText('');
+        showSecurityWarning();
+    }
+    if (e.metaKey && e.shiftKey && e.key === 'S') { // Windows Snipping
+        showSecurityWarning();
+    }
+    if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
+        e.preventDefault();
+        showSecurityWarning();
+    }
+    if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4')) { // Mac
+        e.preventDefault();
+        showSecurityWarning();
+    }
+});
+
+// 4. MOBILE PROTECTION: Visibility API & Blur
+// If the hardware button UI (screenshot preview) takes focus, this might catch it
+document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+        showSecurityWarning();
+    }
+});
+
+window.addEventListener('blur', () => {
+   showSecurityWarning();
+});
+
+// Function to Show Red Screen (Aggressive)
+function showSecurityWarning() {
+    if(screenshotWarning) {
+        // INSTANTLY display flex (no animation, no delay)
+        screenshotWarning.style.display = 'flex';
+        
+        // Hide it after 2 seconds if the user stops
+        // But only if they are focused again
+        setTimeout(() => {
+            if (document.visibilityState === "visible") {
+                screenshotWarning.style.display = 'none';
+            }
+        }, 2000);
+    } else {
+        // Fallback if HTML element missing
+        document.body.style.display = 'none';
+        alert('Screenshots disabled');
+        document.body.style.display = 'block';
+    }
+}
+
+// ============================================
+// END SECURITY LOGIC
+// ============================================
 
 // IMAGE UPLOAD
 imageUpload.addEventListener('change', function(e) {
@@ -266,7 +342,7 @@ async function downloadWithSize(width, height) {
         tempContainer.style.height = height + 'px';
         
         // FIXED: Position ON SCREEN but hidden behind everything using z-index
-        // This ensures browser renders it, unlike left: -9999px
+        // This ensures the browser actually renders it so htmlToImage can see it
         tempContainer.style.position = 'fixed'; 
         tempContainer.style.left = '0';
         tempContainer.style.top = '0';

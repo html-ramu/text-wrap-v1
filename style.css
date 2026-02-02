@@ -11,6 +11,29 @@ body {
     min-height: 100vh;
     padding: 8px;
     line-height: 1.5;
+    
+    /* PREVENT TEXT SELECTION & COPYING */
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* ANTI-PRINTING: Hides everything if user tries Ctrl+P */
+@media print {
+    body {
+        display: none !important;
+    }
+    html::after {
+        content: "SCREENSHOTS & PRINTING NOT ALLOWED";
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        font-size: 2em;
+        font-weight: bold;
+        color: black;
+    }
 }
 
 .container {
@@ -20,6 +43,7 @@ body {
     border-radius: 15px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     overflow: hidden;
+    transition: filter 0.2s;
 }
 
 /* Header */
@@ -513,6 +537,38 @@ textarea:focus {
     color: #666;
     margin-top: 5px;
     font-weight: 400;
+}
+
+/* SECURITY OVERLAY STYLES */
+/* MAX Z-INDEX ensures it sits on top of everything else */
+#screenshotWarning {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: black;
+    color: red;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2147483647; 
+    text-align: center;
+}
+
+#screenshotWarning h1 {
+    font-size: 3em;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    animation: flash 1s infinite;
+}
+
+@keyframes flash {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
 }
 
 /* Very small phones */
