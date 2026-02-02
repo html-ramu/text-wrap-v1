@@ -40,6 +40,9 @@
                     <button id="addToFlowerBtn" class="add-shape-btn flower-btn">
                         ➕ Flower
                     </button>
+                    <button id="textCircleBtn" class="add-shape-btn text-circle-btn">
+                        🔤 Text Circle
+                    </button>
                 </div>
             </div>
 
@@ -49,56 +52,33 @@
                     <button id="posLeftBtn" class="toggle-btn active" data-pos="left">
                         ⬅️ Left
                     </button>
-                    <button id="posCenterBtn" class="toggle-btn" data-pos="center">
-                        ⬇️ Center (Bottom Wrap)
-                    </button>
                     <button id="posRightBtn" class="toggle-btn" data-pos="right">
                         Right ➡️
                     </button>
                 </div>
             </div>
 
-            <div class="drop-zones-container">
-                <div class="shape-zone">
-                    <p class="zone-label">Circle</p>
-                    <div class="drop-zone" id="circleZone" data-shape="circle">
-                        <div class="circle-preview">
-                            <span class="drop-text">⭕</span>
-                        </div>
-                    </div>
+            <div class="control-section">
+                <p class="section-label">Size Options:</p>
+                <div class="toggle-container">
+                    <button class="toggle-btn size-preset" data-size="150">Auto</button>
+                    <button class="toggle-btn size-preset" data-size="250">Large</button>
+                    <button class="toggle-btn size-preset" data-size="350">Extra Large</button>
                 </div>
-
-                <div class="shape-zone">
-                    <p class="zone-label">16-Gon</p>
-                    <div class="drop-zone" id="hexadecagonZone" data-shape="hexadecagon">
-                        <div class="hexadecagon-preview">
-                            <span class="drop-text">⚙️</span>
-                        </div>
-                    </div>
+                
+                <div class="size-slider-container">
+                    <label>Custom: <span id="sizeValue">150px</span></label>
+                    <input type="range" id="imageSize" min="100" max="400" value="150">
                 </div>
-
-                <div class="shape-zone" style="grid-column: span 2;">
-                    <p class="zone-label">16-Petal Flower</p>
-                    <div class="drop-zone" id="flowerZone" data-shape="flower">
-                        <div class="flower-preview">
-                            <span class="drop-text">🌸</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="size-control">
-                <label>Size: <span id="sizeValue">100px</span></label>
-                <input type="range" id="imageSize" min="80" max="150" value="100">
             </div>
 
             <div class="text-section">
                 <label for="teluguText">Your Text</label>
                 <textarea 
                     id="teluguText" 
-                    rows="4" 
+                    rows="6" 
                     placeholder="Type text here..."
-                >తెలుగు భాష భారతదేశంలోని అత్యంత పురాతన భాషలలో ఒకటి. ఇది ద్రావిడ భాషా కుటుంబానికి చెందినది. తెలుగు ప్రపంచంలోని అతి వేగంగా వృద్ధి చెందుతున్న భాషల్లో ఒకటిగా గుర్తించబడింది. ఈ భాష దాదాపు 8 కోట్ల మంది మాతృభాషగా మాట్లాడుతున్నారు. తెలుగు లిపి సుందరమైన వృత్తాకార రూపాలతో ప్రసిద్ధి చెందింది. ఇది చాలా శాస్త్రీయమైన లిపి.</textarea>
+                >తెలుగు భాష భారతదేశంలోని అత్యంత పురాతన భాషలలో ఒకటి. ఇది ద్రావిడ భాషా కుటుంబానికి చెందినది. తెలుగు ప్రపంచంలోని అతి వేగంగా వృద్ధి చెందుతున్న భాషల్లో ఒకటిగా గుర్తించబడింది. ఈ భాష దాదాపు 8 కోట్ల మంది మాతృభాషగా మాట్లాడుతున్నారు. తెలుగు లిపి సుందరమైన వృత్తాకార రూపాలతో ప్రసిద్ధి చెందింది.</textarea>
             </div>
 
         </div>
@@ -111,7 +91,7 @@
                 </button>
             </div>
             <div id="resultContainer" class="result-container">
-                <p class="placeholder">Choose image and add to shape</p>
+                <p class="placeholder">Choose image/shape to start</p>
             </div>
         </div>
 
