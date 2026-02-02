@@ -1,0 +1,351 @@
+/* Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans Telugu', sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 8px;
+    line-height: 1.5;
+}
+
+.container {
+    max-width: 500px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* Header */
+header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
+
+header h1 {
+    font-size: 1.3em;
+    font-weight: 600;
+}
+
+/* Main Content */
+.main-content {
+    padding: 15px;
+}
+
+/* Upload Section */
+.upload-section {
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.upload-btn {
+    display: inline-block;
+    background: #667eea;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.upload-btn:active {
+    background: #764ba2;
+    transform: scale(0.97);
+}
+
+/* Drop Zone Container */
+.drop-zone-container {
+    margin-bottom: 15px;
+}
+
+.instruction {
+    text-align: center;
+    color: #666;
+    font-size: 0.85em;
+    margin-bottom: 10px;
+}
+
+.drop-zone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f8f9fa;
+    border: 2px dashed #ddd;
+    border-radius: 12px;
+    padding: 15px;
+    min-height: 140px;
+    transition: all 0.3s;
+}
+
+.drop-zone.drag-over {
+    border-color: #667eea;
+    background: #e8f0ff;
+    transform: scale(1.02);
+}
+
+.drop-zone.has-image {
+    border-color: #28a745;
+    background: #f0fff4;
+    border-style: solid;
+}
+
+/* Circle Preview */
+.circle-preview {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 0.9em;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.drop-text {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Image in Circle */
+.circle-image {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    object-fit: cover;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Draggable Image Preview */
+.image-preview {
+    text-align: center;
+    margin: 15px 0;
+}
+
+.image-preview img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+    display: none;
+}
+
+.image-preview img:active {
+    cursor: grabbing;
+}
+
+.image-preview img.visible {
+    display: block;
+    margin: 0 auto;
+}
+
+.no-image {
+    color: #999;
+    font-size: 0.85em;
+    font-style: italic;
+}
+
+.no-image.hidden {
+    display: none;
+}
+
+/* Size Control */
+.size-control {
+    margin-bottom: 15px;
+}
+
+.size-control label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9em;
+}
+
+input[type="range"] {
+    width: 100%;
+    height: 6px;
+    border-radius: 4px;
+    background: #ddd;
+    outline: none;
+    cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #667eea;
+    cursor: pointer;
+    border: none;
+}
+
+/* Text Section */
+.text-section {
+    margin-bottom: 15px;
+}
+
+.text-section label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #333;
+    font-size: 0.9em;
+}
+
+textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.9em;
+    font-family: 'Noto Sans Telugu', sans-serif;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+textarea:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+/* Preview Section */
+.preview-section {
+    background: #f8f9fa;
+    padding: 15px;
+    border-top: 2px solid #e9ecef;
+}
+
+/* Preview Header with Download Button */
+.preview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.preview-section h2 {
+    color: #333;
+    font-size: 1.2em;
+    margin: 0;
+}
+
+/* Download Button */
+.download-btn {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.85em;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'Noto Sans Telugu', sans-serif;
+    transition: all 0.2s;
+    box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+}
+
+.download-btn:hover {
+    background: #218838;
+}
+
+.download-btn:active {
+    background: #1e7e34;
+    transform: scale(0.97);
+}
+
+.download-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.result-container {
+    background: white;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    padding: 15px;
+    min-height: 200px;
+    font-size: 0.85em;
+    line-height: 1.7;
+    text-align: justify;
+    color: #333;
+}
+
+.placeholder {
+    text-align: center;
+    color: #999;
+    font-style: italic;
+    padding: 60px 15px;
+    font-size: 0.9em;
+}
+
+/* Wrapped Image */
+.wrapped-image {
+    float: left;
+    margin: 0 12px 10px 0;
+    border-radius: 50%;
+    shape-outside: circle(50%);
+    object-fit: cover;
+}
+
+/* Clear float after text */
+.result-container::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* Very small phones */
+@media (max-width: 360px) {
+    header h1 {
+        font-size: 1.1em;
+    }
+    
+    .circle-preview,
+    .circle-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .result-container {
+        font-size: 0.8em;
+    }
+    
+    .preview-header {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .download-btn {
+        width: 100%;
+    }
+}
+
+/* Touch feedback */
+@media (hover: none) {
+    .drop-zone:active {
+        border-color: #667eea;
+        background: #e8f0ff;
+    }
+}

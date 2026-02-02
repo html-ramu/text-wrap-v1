@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="te">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Telugu Text Wrapper</title>
+    
+    <!-- Load Telugu font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Header -->
+        <header>
+            <h1>Telugu Text Wrapper</h1>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            
+            <!-- Upload Button -->
+            <div class="upload-section">
+                <label for="imageUpload" class="upload-btn">
+                    📷 Choose Image
+                </label>
+                <input type="file" id="imageUpload" accept="image/*" hidden>
+            </div>
+
+            <!-- Circle Drop Zone -->
+            <div class="drop-zone-container">
+                <p class="instruction">Drag image here 👇</p>
+                <div class="drop-zone" id="circleZone">
+                    <div class="circle-preview">
+                        <span class="drop-text">Circle</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Draggable Image Preview -->
+            <div id="imagePreview" class="image-preview">
+                <img id="previewImg" src="" alt="" draggable="true">
+                <p class="no-image">Select image above</p>
+            </div>
+
+            <!-- Size Control -->
+            <div class="size-control">
+                <label>Size: <span id="sizeValue">100px</span></label>
+                <input type="range" id="imageSize" min="80" max="150" value="100">
+            </div>
+
+            <!-- Text Input -->
+            <div class="text-section">
+                <label for="teluguText">Your Text</label>
+                <textarea 
+                    id="teluguText" 
+                    rows="4" 
+                    placeholder="తెలుగు వచనం..."
+                >తెలుగు భాష భారతదేశంలోని అత్యంత పురాతన భాషలలో ఒకటి. ఇది ద్రావిడ భాషా కుటుంబానికి చెందినది. తెలుగు ప్రపంచంలోని అతి వేగంగా వృద్ధి చెందుతున్న భాషల్లో ఒకటిగా గుర్తించబడింది. ఈ భాష దాదాపు 8 కోట్ల మంది మాతృభాషగా మాట్లాడుతున్నారు. తెలుగు లిపి సుందరమైన వృత్తాకార రూపాలతో ప్రసిద్ధి చెందింది. ఇది చాలా శాస్త్రీయమైన లిపి.</textarea>
+            </div>
+
+        </div>
+
+        <!-- Preview Section -->
+        <div class="preview-section">
+            <div class="preview-header">
+                <h2>Preview</h2>
+                <button id="downloadBtn" class="download-btn" style="display: none;">
+                    ⬇️ Download
+                </button>
+            </div>
+            <div id="resultContainer" class="result-container">
+                <p class="placeholder">Drag image to circle</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Load html2canvas library for screenshot -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
