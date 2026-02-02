@@ -4,10 +4,14 @@ const previewImg = document.getElementById('previewImg');
 const imagePreview = document.getElementById('imagePreview');
 const noImageText = imagePreview.querySelector('.no-image');
 const addButtons = document.querySelector('.add-buttons');
+const positionControl = document.getElementById('positionControl');
 
 const addToCircleBtn = document.getElementById('addToCircleBtn');
 const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
 const addToFlowerBtn = document.getElementById('addToFlowerBtn');
+
+const posLeftBtn = document.getElementById('posLeftBtn');
+const posRightBtn = document.getElementById('posRightBtn');
 
 const circleZone = document.getElementById('circleZone');
 const hexadecagonZone = document.getElementById('hexadecagonZone');
@@ -27,8 +31,8 @@ const screenshotWarning = document.getElementById('screenshotWarning');
 let currentImageSrc = null;
 let currentShape = null;
 let currentSize = 100;
+let currentPos = 'left'; // Default to left
 let dominantColor = '#667eea';
-let warningTimeout = null;
 
 // POLYGON STRINGS
 const hexadecagonPoly = 'polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%)';
@@ -38,84 +42,49 @@ const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 7
 const colorThief = new ColorThief();
 
 // ============================================
-// ANTI-SCREENSHOT PROTECTION
+// SAFE SECURITY LOGIC (Allows Typing)
 // ============================================
 
-// Detect 3-finger touch (mobile screenshot gesture)
-document.addEventListener('touchstart', (e) => {
-    if (e.touches.length >= 3) {
-        e.preventDefault();
-        showSecurityWarning();
-    }
-}, { passive: false });
-
-// Disable right-click
-document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    showSecurityWarning();
+// 1. Disable Right Click
+document.addEventListener('contextmenu', event => {
+    event.preventDefault();
 });
 
-// Detect keyboard shortcuts
+// 2. Detect Keyboard Shortcuts (PrintScreen / Snipping)
 document.addEventListener('keydown', (e) => {
-    // PrintScreen
     if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
+        try { navigator.clipboard.writeText(''); } catch(err) {}
         showSecurityWarning();
     }
-    // Windows Snipping Tool (Win + Shift + S)
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+    // Windows Snipping Tool (Win+Shift+S)
+    if (e.metaKey && e.shiftKey && e.key === 'S') { 
+        showSecurityWarning();
+    }
+    // Prevent Printing and Saving
+    if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u')) {
         e.preventDefault();
         showSecurityWarning();
     }
-    // Prevent Ctrl+P, Ctrl+S, Ctrl+U, Ctrl+C
-    if (e.ctrlKey && ['p', 's', 'u', 'c'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        showSecurityWarning();
-    }
 });
 
-// Mobile app visibility change detection
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        showSecurityWarning();
-    } else {
-        hideSecurityWarning();
-    }
-});
-
-// Window focus/blur detection
-window.addEventListener('blur', () => {
-    showSecurityWarning();
-});
-
-window.addEventListener('focus', () => {
-    hideSecurityWarning();
-});
-
-// Security warning functions
 function showSecurityWarning() {
-    if (screenshotWarning) {
+    if(screenshotWarning) {
         screenshotWarning.style.display = 'flex';
-        
-        // Auto-hide after 2 seconds
-        clearTimeout(warningTimeout);
-        warningTimeout = setTimeout(() => {
-            hideSecurityWarning();
-        }, 2000);
+        setTimeout(hideSecurityWarning, 2000);
     }
 }
 
 function hideSecurityWarning() {
-    if (screenshotWarning) {
+    if(screenshotWarning) {
         screenshotWarning.style.display = 'none';
     }
-    clearTimeout(warningTimeout);
 }
 
 // ============================================
-// IMAGE UPLOAD
+// APP LOGIC
 // ============================================
 
+// IMAGE UPLOAD
 imageUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
     
@@ -127,15 +96,15 @@ imageUpload.addEventListener('change', function(e) {
             previewImg.src = currentImageSrc;
             previewImg.classList.add('visible');
             noImageText.classList.add('hidden');
+            
             addButtons.style.display = 'flex';
             
             previewImg.onload = function() {
                 try {
                     const color = colorThief.getColor(previewImg);
                     dominantColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                    console.log('Dominant color extracted:', dominantColor);
                 } catch (error) {
-                    console.warn('Color extraction failed, using default');
+                    console.log('Using default color');
                     dominantColor = '#667eea';
                 }
             };
@@ -145,10 +114,7 @@ imageUpload.addEventListener('change', function(e) {
     }
 });
 
-// ============================================
-// SHAPE SELECTION
-// ============================================
-
+// SHAPE BUTTONS
 addToCircleBtn.addEventListener('click', () => setShape('circle', circleZone));
 addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon', hexadecagonZone));
 addToFlowerBtn.addEventListener('click', () => setShape('flower', flowerZone));
@@ -158,9 +124,27 @@ function setShape(shape, zone) {
         clearAllShapes();
         currentShape = shape;
         placeImageInShape(zone, shape);
+        // Show position controls
+        positionControl.style.display = 'block';
         updatePreview();
     }
 }
+
+// POSITION CONTROL (Left/Right)
+posLeftBtn.addEventListener('click', () => {
+    currentPos = 'left';
+    posLeftBtn.classList.add('active');
+    posRightBtn.classList.remove('active');
+    updatePreview();
+});
+
+posRightBtn.addEventListener('click', () => {
+    currentPos = 'right';
+    posRightBtn.classList.add('active');
+    posLeftBtn.classList.remove('active');
+    updatePreview();
+});
+
 
 function clearAllShapes() {
     circleZone.innerHTML = '<div class="circle-preview"><span class="drop-text">⭕</span></div>';
@@ -174,11 +158,10 @@ function clearAllShapes() {
 
 function placeImageInShape(zone, shape) {
     let poly = '';
-    
     if (shape === 'hexadecagon') poly = hexadecagonPoly;
     else if (shape === 'flower') poly = flowerPoly;
 
-    const clipStyle = shape === 'circle' ? 'border-radius: 50%;' : `clip-path: ${poly};`;
+    const clipStyle = shape === 'circle' ? `border-radius: 50%;` : `clip-path: ${poly};`;
     
     zone.innerHTML = `
         <div style="width: ${currentSize}px; height: ${currentSize}px; 
@@ -195,36 +178,25 @@ function placeImageInShape(zone, shape) {
     zone.classList.add('has-image');
 }
 
-// ============================================
 // SIZE CONTROL
-// ============================================
-
 imageSize.addEventListener('input', function(e) {
-    currentSize = parseInt(e.target.value);
+    currentSize = e.target.value;
     sizeValue.textContent = currentSize + 'px';
     
     if (currentShape) {
-        const zones = {
-            'circle': circleZone,
-            'hexadecagon': hexadecagonZone,
-            'flower': flowerZone
-        };
-        
-        placeImageInShape(zones[currentShape], currentShape);
-        updatePreview();
+        let zone;
+        if(currentShape === 'circle') zone = circleZone;
+        else if(currentShape === 'hexadecagon') zone = hexadecagonZone;
+        else if(currentShape === 'flower') zone = flowerZone;
+        placeImageInShape(zone, currentShape);
     }
+    updatePreview();
 });
 
-// ============================================
 // TEXT INPUT
-// ============================================
-
 teluguText.addEventListener('input', updatePreview);
 
-// ============================================
 // UPDATE PREVIEW
-// ============================================
-
 function updatePreview() {
     const text = teluguText.value.trim();
     
@@ -234,8 +206,7 @@ function updatePreview() {
         return;
     }
     
-    const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, dominantColor);
-    wrapper.classList.add('wrapped-image');
+    const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, dominantColor, currentPos);
     
     resultContainer.innerHTML = '';
     resultContainer.appendChild(wrapper);
@@ -244,15 +215,25 @@ function updatePreview() {
     downloadBtn.style.display = 'block';
 }
 
-function createShapeWrapper(size, shape, src, color) {
+// Helper to create the shape DOM structure
+function createShapeWrapper(size, shape, src, color, pos) {
     const div = document.createElement('div');
     const img = document.createElement('img');
     
     div.style.width = size + 'px';
     div.style.height = size + 'px';
     div.style.background = color;
-    div.style.float = 'left';
-    div.style.margin = '0 15px 5px 0';
+    
+    // POSITION LOGIC (Left vs Right)
+    div.style.float = pos; 
+    
+    // Add margins based on side to prevent text sticking
+    if (pos === 'left') {
+        div.style.margin = '0 15px 5px 0';
+    } else {
+        div.style.margin = '0 0 5px 15px';
+    }
+
     div.style.display = 'flex';
     div.style.justifyContent = 'center';
     div.style.alignItems = 'center';
@@ -262,40 +243,42 @@ function createShapeWrapper(size, shape, src, color) {
     img.style.height = '100%';
     img.style.objectFit = 'cover';
     img.style.transform = 'scale(0.92)';
-    img.crossOrigin = 'anonymous';
     
     if (shape === 'circle') {
         div.style.borderRadius = '50%';
         div.style.shapeOutside = 'circle(50%)';
+        div.style.webkitShapeOutside = 'circle(50%)';
         img.style.borderRadius = '50%';
     } else {
         const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
         div.style.clipPath = poly;
+        div.style.webkitClipPath = poly;
         div.style.shapeOutside = poly;
+        div.style.webkitShapeOutside = poly;
         img.style.clipPath = poly;
+        img.style.webkitClipPath = poly;
     }
     
     div.appendChild(img);
     return div;
 }
 
-// ============================================
 // MODAL HANDLING
-// ============================================
+downloadBtn.addEventListener('click', function() {
+    sizeModal.classList.add('show');
+});
 
-downloadBtn.addEventListener('click', () => sizeModal.classList.add('show'));
-closeModal.addEventListener('click', () => sizeModal.classList.remove('show'));
+closeModal.addEventListener('click', function() {
+    sizeModal.classList.remove('show');
+});
 
-sizeModal.addEventListener('click', (e) => {
+sizeModal.addEventListener('click', function(e) {
     if (e.target === sizeModal) {
         sizeModal.classList.remove('show');
     }
 });
 
-// ============================================
-// DOWNLOAD SIZE SELECTION
-// ============================================
-
+// DOWNLOAD HANDLERS
 sizeOptionBtns.forEach(btn => {
     btn.addEventListener('click', function() {
         const type = this.dataset.type;
@@ -311,10 +294,6 @@ sizeOptionBtns.forEach(btn => {
     });
 });
 
-// ============================================
-// AUTO SIZE DOWNLOAD
-// ============================================
-
 async function downloadAutoSize() {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
@@ -324,28 +303,21 @@ async function downloadAutoSize() {
         
         const dataUrl = await htmlToImage.toPng(resultContainer, {
             backgroundColor: '#ffffff',
-            pixelRatio: 4,
-            quality: 1,
-            cacheBust: true,
+            pixelRatio: 3,
             style: {
                 fontFamily: "'Noto Sans Telugu', sans-serif"
             }
         });
         
-        triggerDownload(dataUrl, 'auto');
+        triggerDownload(dataUrl, `auto`);
         
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
-    } finally {
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
 }
-
-// ============================================
-// FIXED SIZE DOWNLOAD
-// ============================================
 
 async function downloadWithSize(width, height) {
     downloadBtn.disabled = true;
@@ -356,25 +328,33 @@ async function downloadWithSize(width, height) {
         const fontSize = width * 0.024;
         
         const tempContainer = document.createElement('div');
-        tempContainer.style.cssText = `
-            width: ${width}px;
-            height: ${height}px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: -9999;
-            background: #ffffff;
-            padding: 40px;
-            box-sizing: border-box;
-            font-family: 'Noto Sans Telugu', sans-serif;
-            font-size: ${fontSize}px;
-            line-height: 1.8;
-            color: #333;
-            text-align: justify;
-        `;
+        tempContainer.style.width = width + 'px';
+        tempContainer.style.height = height + 'px';
         
-        const wrapper = createShapeWrapper(imageCircleSize, currentShape, currentImageSrc, dominantColor);
-        wrapper.style.margin = `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0`;
+        // Use z-index to keep on screen but hidden (fixes blank download)
+        tempContainer.style.position = 'fixed'; 
+        tempContainer.style.left = '0';
+        tempContainer.style.top = '0';
+        tempContainer.style.zIndex = '-9999'; 
+        
+        tempContainer.style.background = '#ffffff';
+        tempContainer.style.padding = '40px';
+        tempContainer.style.boxSizing = 'border-box';
+        tempContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
+        tempContainer.style.fontSize = fontSize + 'px';
+        tempContainer.style.lineHeight = '1.8';
+        tempContainer.style.color = '#333';
+        tempContainer.style.textAlign = 'justify';
+        
+        // Create wrapper with current position (left/right)
+        const wrapper = createShapeWrapper(imageCircleSize, currentShape, currentImageSrc, dominantColor, currentPos);
+        
+        // Scale margins for download
+        if (currentPos === 'left') {
+            wrapper.style.margin = `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0`;
+        } else {
+            wrapper.style.margin = `0 0 ${fontSize * 0.5}px ${fontSize * 1.2}px`;
+        }
         
         tempContainer.appendChild(wrapper);
         tempContainer.appendChild(document.createTextNode(teluguText.value));
@@ -387,11 +367,9 @@ async function downloadWithSize(width, height) {
             backgroundColor: '#ffffff',
             width: width,
             height: height,
-            pixelRatio: 2,
-            quality: 1,
-            cacheBust: true,
+            pixelRatio: 1, 
             style: {
-                fontFamily: "'Noto Sans Telugu', sans-serif"
+                 fontFamily: "'Noto Sans Telugu', sans-serif"
             }
         });
         
@@ -401,7 +379,6 @@ async function downloadWithSize(width, height) {
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
-    } finally {
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
@@ -414,15 +391,15 @@ function triggerDownload(dataUrl, suffix) {
     link.download = `telugu-text-wrap-${currentShape}-${suffix}-${timestamp}.png`;
     link.href = dataUrl;
     link.click();
+    
+    downloadBtn.disabled = false;
+    downloadBtn.textContent = '⬇️ Download';
 }
 
-// ============================================
-// FONT LOADING
-// ============================================
-
-window.addEventListener('load', () => {
+// FONTS LOAD
+window.addEventListener('load', function() {
     if (document.fonts) {
-        document.fonts.ready.then(() => {
+        document.fonts.ready.then(function() {
             console.log('Telugu fonts loaded successfully');
         });
     }
