@@ -154,7 +154,7 @@ sizeModal.addEventListener('click', function(e) {
 });
 
 // ==========================================
-// DOWNLOAD WITH SIZE SELECTION
+// DOWNLOAD WITH SIZE SELECTION - LARGER OUTPUT
 // ==========================================
 
 sizeOptionBtns.forEach(btn => {
@@ -176,6 +176,13 @@ async function downloadWithSize(width, height) {
     downloadBtn.textContent = 'Processing...';
     
     try {
+        // Calculate image size based on canvas dimensions (much larger)
+        const imageCircleSize = Math.min(width, height) * 0.35; // 35% of smaller dimension
+        const borderWidth = imageCircleSize * 0.04; // 4% of image size as border
+        
+        // Calculate font size based on canvas width (larger text)
+        const fontSize = width * 0.024; // 2.4% of width for readable text
+        
         // Create a temporary container with exact size
         const tempContainer = document.createElement('div');
         tempContainer.style.width = width + 'px';
@@ -183,22 +190,27 @@ async function downloadWithSize(width, height) {
         tempContainer.style.position = 'absolute';
         tempContainer.style.left = '-9999px';
         tempContainer.style.background = '#ffffff';
-        tempContainer.style.padding = '30px';
+        tempContainer.style.padding = '40px';
         tempContainer.style.boxSizing = 'border-box';
         tempContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
-        tempContainer.style.fontSize = '16px';
-        tempContainer.style.lineHeight = '1.7';
+        tempContainer.style.fontSize = fontSize + 'px';
+        tempContainer.style.lineHeight = '1.8';
         tempContainer.style.color = '#333';
         tempContainer.style.textAlign = 'justify';
+        tempContainer.style.borderRadius = '20px';
         
-        // Clone the content
+        // Clone the content with larger image
         const text = teluguText.value;
         tempContainer.innerHTML = `
             <img 
                 src="${currentImageSrc}" 
-                style="float: left; margin: 0 20px 15px 0; border-radius: 50%; 
-                       width: ${currentSize * 1.5}px; height: ${currentSize * 1.5}px; 
-                       border: 6px solid ${dominantColor}; object-fit: cover;
+                style="float: left; 
+                       margin: 0 ${fontSize * 1.2}px ${fontSize * 0.8}px 0; 
+                       border-radius: 50%; 
+                       width: ${imageCircleSize}px; 
+                       height: ${imageCircleSize}px; 
+                       border: ${borderWidth}px solid ${dominantColor}; 
+                       object-fit: cover;
                        shape-outside: circle(50%);"
                 alt="Circle">
             ${text}
@@ -207,9 +219,9 @@ async function downloadWithSize(width, height) {
         document.body.appendChild(tempContainer);
         
         // Wait for fonts and images to load
-        await new Promise(resolve => setTimeout(resolve, 200));
+        await new Promise(resolve => setTimeout(resolve, 300));
         
-        // Capture with html2canvas
+        // Capture with html2canvas at high quality
         const canvas = await html2canvas(tempContainer, {
             backgroundColor: '#ffffff',
             scale: 2,

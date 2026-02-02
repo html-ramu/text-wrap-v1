@@ -411,7 +411,7 @@ textarea:focus {
     background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
     border: 2px solid #ddd;
     border-radius: 10px;
-    padding: 20px;
+    padding: 25px;
     cursor: pointer;
     transition: all 0.3s;
     font-family: 'Noto Sans Telugu', sans-serif;
@@ -429,17 +429,10 @@ textarea:focus {
     transform: translateY(0);
 }
 
-.size-label {
-    font-size: 1.1em;
-    font-weight: 600;
-    color: #333;
-    margin-bottom: 5px;
-}
-
 .size-dimensions {
-    font-size: 1em;
+    font-size: 1.3em;
     color: #667eea;
-    font-weight: 600;
+    font-weight: 700;
 }
 
 /* Very small phones */
@@ -472,7 +465,7 @@ textarea:focus {
     }
     
     .size-option-btn {
-        padding: 15px;
+        padding: 20px;
     }
 }
 
