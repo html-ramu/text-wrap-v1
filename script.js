@@ -28,6 +28,7 @@ let currentImageSrc = null;
 let currentShape = null;
 let currentSize = 100;
 let dominantColor = '#667eea';
+let warningTimeout = null;
 
 // POLYGON STRINGS
 const hexadecagonPoly = 'polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%)';
@@ -37,76 +38,84 @@ const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 7
 const colorThief = new ColorThief();
 
 // ============================================
-// AGGRESSIVE ANTI-SCREENSHOT LOGIC
+// ANTI-SCREENSHOT PROTECTION
 // ============================================
 
-// 1. DETECT 3-FINGER SWIPE
+// Detect 3-finger touch (mobile screenshot gesture)
 document.addEventListener('touchstart', (e) => {
     if (e.touches.length >= 3) {
+        e.preventDefault();
         showSecurityWarning();
     }
 }, { passive: false });
 
-// 2. Disable Right Click
-document.addEventListener('contextmenu', event => {
-    event.preventDefault();
+// Disable right-click
+document.addEventListener('contextmenu', (e) => {
+    e.preventDefault();
     showSecurityWarning();
 });
 
-// 3. Detect Keyboard Shortcuts
+// Detect keyboard shortcuts
 document.addEventListener('keydown', (e) => {
+    // PrintScreen
     if (e.key === 'PrintScreen') {
         navigator.clipboard.writeText('');
         showSecurityWarning();
     }
-    if (e.metaKey && e.shiftKey && e.key === 'S') { // Windows Snipping
+    // Windows Snipping Tool (Win + Shift + S)
+    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
+        e.preventDefault();
         showSecurityWarning();
     }
-    if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
+    // Prevent Ctrl+P, Ctrl+S, Ctrl+U, Ctrl+C
+    if (e.ctrlKey && ['p', 's', 'u', 'c'].includes(e.key.toLowerCase())) {
         e.preventDefault();
         showSecurityWarning();
     }
 });
 
-// 4. MOBILE PROTECTION (Fix for "Stuck Red Screen")
-document.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-        // App went to background -> Show Red Screen
+// Mobile app visibility change detection
+document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
         showSecurityWarning();
     } else {
-        // App came back -> HIDE Red Screen immediately
         hideSecurityWarning();
     }
 });
 
+// Window focus/blur detection
 window.addEventListener('blur', () => {
-   showSecurityWarning();
+    showSecurityWarning();
 });
 
 window.addEventListener('focus', () => {
-   hideSecurityWarning();
+    hideSecurityWarning();
 });
 
-// Helper Functions
+// Security warning functions
 function showSecurityWarning() {
-    if(screenshotWarning) {
+    if (screenshotWarning) {
         screenshotWarning.style.display = 'flex';
-    } else {
-        alert('Screenshots disabled');
+        
+        // Auto-hide after 2 seconds
+        clearTimeout(warningTimeout);
+        warningTimeout = setTimeout(() => {
+            hideSecurityWarning();
+        }, 2000);
     }
 }
 
 function hideSecurityWarning() {
-    if(screenshotWarning) {
+    if (screenshotWarning) {
         screenshotWarning.style.display = 'none';
     }
+    clearTimeout(warningTimeout);
 }
 
 // ============================================
-// END SECURITY LOGIC
+// IMAGE UPLOAD
 // ============================================
 
-// IMAGE UPLOAD
 imageUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
     
@@ -118,15 +127,15 @@ imageUpload.addEventListener('change', function(e) {
             previewImg.src = currentImageSrc;
             previewImg.classList.add('visible');
             noImageText.classList.add('hidden');
-            
             addButtons.style.display = 'flex';
             
             previewImg.onload = function() {
                 try {
                     const color = colorThief.getColor(previewImg);
                     dominantColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
+                    console.log('Dominant color extracted:', dominantColor);
                 } catch (error) {
-                    console.log('Using default color');
+                    console.warn('Color extraction failed, using default');
                     dominantColor = '#667eea';
                 }
             };
@@ -136,7 +145,10 @@ imageUpload.addEventListener('change', function(e) {
     }
 });
 
-// ADD TO SHAPE BUTTONS
+// ============================================
+// SHAPE SELECTION
+// ============================================
+
 addToCircleBtn.addEventListener('click', () => setShape('circle', circleZone));
 addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon', hexadecagonZone));
 addToFlowerBtn.addEventListener('click', () => setShape('flower', flowerZone));
@@ -150,7 +162,6 @@ function setShape(shape, zone) {
     }
 }
 
-// Clear all shapes
 function clearAllShapes() {
     circleZone.innerHTML = '<div class="circle-preview"><span class="drop-text">⭕</span></div>';
     hexadecagonZone.innerHTML = '<div class="hexadecagon-preview"><span class="drop-text">⚙️</span></div>';
@@ -161,16 +172,14 @@ function clearAllShapes() {
     flowerZone.classList.remove('has-image');
 }
 
-// Place image in shape (Drop Zone)
 function placeImageInShape(zone, shape) {
     let poly = '';
     
     if (shape === 'hexadecagon') poly = hexadecagonPoly;
     else if (shape === 'flower') poly = flowerPoly;
 
-    const clipStyle = shape === 'circle' ? `border-radius: 50%;` : `clip-path: ${poly};`;
+    const clipStyle = shape === 'circle' ? 'border-radius: 50%;' : `clip-path: ${poly};`;
     
-    // We use a wrapper with background color to simulate the border
     zone.innerHTML = `
         <div style="width: ${currentSize}px; height: ${currentSize}px; 
                     background: ${dominantColor}; 
@@ -186,27 +195,36 @@ function placeImageInShape(zone, shape) {
     zone.classList.add('has-image');
 }
 
+// ============================================
 // SIZE CONTROL
+// ============================================
+
 imageSize.addEventListener('input', function(e) {
-    currentSize = e.target.value;
+    currentSize = parseInt(e.target.value);
     sizeValue.textContent = currentSize + 'px';
     
     if (currentShape) {
-        let zone;
-        if(currentShape === 'circle') zone = circleZone;
-        else if(currentShape === 'hexadecagon') zone = hexadecagonZone;
-        else if(currentShape === 'flower') zone = flowerZone;
+        const zones = {
+            'circle': circleZone,
+            'hexadecagon': hexadecagonZone,
+            'flower': flowerZone
+        };
         
-        placeImageInShape(zone, currentShape);
+        placeImageInShape(zones[currentShape], currentShape);
+        updatePreview();
     }
-    
-    updatePreview();
 });
 
+// ============================================
 // TEXT INPUT
+// ============================================
+
 teluguText.addEventListener('input', updatePreview);
 
+// ============================================
 // UPDATE PREVIEW
+// ============================================
+
 function updatePreview() {
     const text = teluguText.value.trim();
     
@@ -226,14 +244,13 @@ function updatePreview() {
     downloadBtn.style.display = 'block';
 }
 
-// Helper to create the shape DOM structure
 function createShapeWrapper(size, shape, src, color) {
     const div = document.createElement('div');
     const img = document.createElement('img');
     
     div.style.width = size + 'px';
     div.style.height = size + 'px';
-    div.style.background = color; // Border color
+    div.style.background = color;
     div.style.float = 'left';
     div.style.margin = '0 15px 5px 0';
     div.style.display = 'flex';
@@ -244,44 +261,41 @@ function createShapeWrapper(size, shape, src, color) {
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
-    img.style.transform = 'scale(0.92)'; // Shrink image to reveal background
+    img.style.transform = 'scale(0.92)';
+    img.crossOrigin = 'anonymous';
     
     if (shape === 'circle') {
         div.style.borderRadius = '50%';
         div.style.shapeOutside = 'circle(50%)';
-        div.style.webkitShapeOutside = 'circle(50%)';
         img.style.borderRadius = '50%';
     } else {
         const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
         div.style.clipPath = poly;
-        div.style.webkitClipPath = poly;
         div.style.shapeOutside = poly;
-        div.style.webkitShapeOutside = poly;
         img.style.clipPath = poly;
-        img.style.webkitClipPath = poly;
     }
     
     div.appendChild(img);
     return div;
 }
 
-
+// ============================================
 // MODAL HANDLING
-downloadBtn.addEventListener('click', function() {
-    sizeModal.classList.add('show');
-});
+// ============================================
 
-closeModal.addEventListener('click', function() {
-    sizeModal.classList.remove('show');
-});
+downloadBtn.addEventListener('click', () => sizeModal.classList.add('show'));
+closeModal.addEventListener('click', () => sizeModal.classList.remove('show'));
 
-sizeModal.addEventListener('click', function(e) {
+sizeModal.addEventListener('click', (e) => {
     if (e.target === sizeModal) {
         sizeModal.classList.remove('show');
     }
 });
 
+// ============================================
 // DOWNLOAD SIZE SELECTION
+// ============================================
+
 sizeOptionBtns.forEach(btn => {
     btn.addEventListener('click', function() {
         const type = this.dataset.type;
@@ -297,7 +311,10 @@ sizeOptionBtns.forEach(btn => {
     });
 });
 
+// ============================================
 // AUTO SIZE DOWNLOAD
+// ============================================
+
 async function downloadAutoSize() {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
@@ -307,23 +324,29 @@ async function downloadAutoSize() {
         
         const dataUrl = await htmlToImage.toPng(resultContainer, {
             backgroundColor: '#ffffff',
-            pixelRatio: 3,
+            pixelRatio: 4,
+            quality: 1,
+            cacheBust: true,
             style: {
                 fontFamily: "'Noto Sans Telugu', sans-serif"
             }
         });
         
-        triggerDownload(dataUrl, `auto`);
+        triggerDownload(dataUrl, 'auto');
         
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
+    } finally {
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
 }
 
+// ============================================
 // FIXED SIZE DOWNLOAD
+// ============================================
+
 async function downloadWithSize(width, height) {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
@@ -333,26 +356,23 @@ async function downloadWithSize(width, height) {
         const fontSize = width * 0.024;
         
         const tempContainer = document.createElement('div');
-        tempContainer.style.width = width + 'px';
-        tempContainer.style.height = height + 'px';
+        tempContainer.style.cssText = `
+            width: ${width}px;
+            height: ${height}px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: -9999;
+            background: #ffffff;
+            padding: 40px;
+            box-sizing: border-box;
+            font-family: 'Noto Sans Telugu', sans-serif;
+            font-size: ${fontSize}px;
+            line-height: 1.8;
+            color: #333;
+            text-align: justify;
+        `;
         
-        // FIXED: Position ON SCREEN but hidden behind everything using z-index
-        // This ensures the browser actually renders it so htmlToImage can see it
-        tempContainer.style.position = 'fixed'; 
-        tempContainer.style.left = '0';
-        tempContainer.style.top = '0';
-        tempContainer.style.zIndex = '-9999'; 
-        
-        tempContainer.style.background = '#ffffff';
-        tempContainer.style.padding = '40px';
-        tempContainer.style.boxSizing = 'border-box';
-        tempContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
-        tempContainer.style.fontSize = fontSize + 'px';
-        tempContainer.style.lineHeight = '1.8';
-        tempContainer.style.color = '#333';
-        tempContainer.style.textAlign = 'justify';
-        
-        // Re-create the shape wrapper logic for the download container
         const wrapper = createShapeWrapper(imageCircleSize, currentShape, currentImageSrc, dominantColor);
         wrapper.style.margin = `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0`;
         
@@ -361,16 +381,17 @@ async function downloadWithSize(width, height) {
         
         document.body.appendChild(tempContainer);
         
-        // Allow DOM to settle and paint
         await new Promise(resolve => setTimeout(resolve, 500));
         
         const dataUrl = await htmlToImage.toPng(tempContainer, {
             backgroundColor: '#ffffff',
             width: width,
             height: height,
-            pixelRatio: 1, 
+            pixelRatio: 2,
+            quality: 1,
+            cacheBust: true,
             style: {
-                 fontFamily: "'Noto Sans Telugu', sans-serif"
+                fontFamily: "'Noto Sans Telugu', sans-serif"
             }
         });
         
@@ -380,6 +401,7 @@ async function downloadWithSize(width, height) {
     } catch (error) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
+    } finally {
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
@@ -392,15 +414,15 @@ function triggerDownload(dataUrl, suffix) {
     link.download = `telugu-text-wrap-${currentShape}-${suffix}-${timestamp}.png`;
     link.href = dataUrl;
     link.click();
-    
-    downloadBtn.disabled = false;
-    downloadBtn.textContent = '⬇️ Download';
 }
 
-// ENSURE FONTS ARE LOADED
-window.addEventListener('load', function() {
+// ============================================
+// FONT LOADING
+// ============================================
+
+window.addEventListener('load', () => {
     if (document.fonts) {
-        document.fonts.ready.then(function() {
+        document.fonts.ready.then(() => {
             console.log('Telugu fonts loaded successfully');
         });
     }

@@ -11,15 +11,12 @@ body {
     min-height: 100vh;
     padding: 8px;
     line-height: 1.5;
-    
-    /* PREVENT TEXT SELECTION & COPYING */
     -webkit-user-select: none;
     -moz-user-select: none;
     -ms-user-select: none;
     user-select: none;
 }
 
-/* ANTI-PRINTING */
 @media print {
     body {
         display: none !important;
@@ -43,10 +40,8 @@ body {
     border-radius: 15px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
     overflow: hidden;
-    transition: filter 0.2s;
 }
 
-/* Header */
 header {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -59,12 +54,10 @@ header h1 {
     font-weight: 600;
 }
 
-/* Main Content */
 .main-content {
     padding: 15px;
 }
 
-/* Upload Section */
 .upload-section {
     text-align: center;
     margin-bottom: 15px;
@@ -87,7 +80,6 @@ header h1 {
     transform: scale(0.97);
 }
 
-/* Image Preview with Buttons */
 .image-preview {
     text-align: center;
     margin: 15px 0;
@@ -119,7 +111,6 @@ header h1 {
     display: none;
 }
 
-/* Add Shape Buttons */
 .add-buttons {
     display: flex;
     gap: 10px;
@@ -132,7 +123,7 @@ header h1 {
     flex: 1;
     min-width: 90px;
     border: none;
-    padding: 10px 10px;
+    padding: 10px;
     border-radius: 8px;
     font-size: 0.85em;
     font-weight: 600;
@@ -146,6 +137,7 @@ header h1 {
     background: #28a745;
     color: white;
 }
+
 .circle-btn:active {
     background: #218838;
     transform: scale(0.97);
@@ -155,6 +147,7 @@ header h1 {
     background: #17a2b8;
     color: white;
 }
+
 .hexadecagon-btn:active {
     background: #117a8b;
     transform: scale(0.97);
@@ -164,12 +157,12 @@ header h1 {
     background: #e83e8c;
     color: white;
 }
+
 .flower-btn:active {
     background: #bd2130;
     transform: scale(0.97);
 }
 
-/* Drop Zones Container */
 .drop-zones-container {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -206,7 +199,6 @@ header h1 {
     border-style: solid;
 }
 
-/* Circle Preview */
 .circle-preview {
     width: 80px;
     height: 80px;
@@ -221,7 +213,6 @@ header h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Hexadecagon Preview (16-Gon) */
 .hexadecagon-preview {
     width: 80px;
     height: 80px;
@@ -236,7 +227,6 @@ header h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Flower Preview (16-Petal) */
 .flower-preview {
     width: 80px;
     height: 80px;
@@ -255,7 +245,6 @@ header h1 {
     text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-/* Size Control */
 .size-control {
     margin-bottom: 15px;
 }
@@ -295,7 +284,6 @@ input[type="range"]::-moz-range-thumb {
     border: none;
 }
 
-/* Text Section */
 .text-section {
     margin-bottom: 15px;
 }
@@ -324,14 +312,12 @@ textarea:focus {
     border-color: #667eea;
 }
 
-/* Preview Section */
 .preview-section {
     background: #f8f9fa;
     padding: 15px;
     border-top: 2px solid #e9ecef;
 }
 
-/* Preview Header with Download Button */
 .preview-header {
     display: flex;
     justify-content: space-between;
@@ -345,7 +331,6 @@ textarea:focus {
     margin: 0;
 }
 
-/* Download Button */
 .download-btn {
     background: #28a745;
     color: white;
@@ -372,6 +357,7 @@ textarea:focus {
 .download-btn:disabled {
     background: #ccc;
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 .result-container {
@@ -394,22 +380,16 @@ textarea:focus {
     font-size: 0.9em;
 }
 
-/* Helper Class for wrapping */
 .wrapped-image {
     float: left;
     margin: 0 12px 10px 0;
 }
 
-/* Clear float after text */
 .result-container::after {
     content: "";
     display: table;
     clear: both;
 }
-
-/* ========================================== */
-/* MODAL STYLES */
-/* ========================================== */
 
 .modal {
     display: none;
@@ -516,7 +496,6 @@ textarea:focus {
     font-weight: 700;
 }
 
-/* Auto Size Button */
 .auto-size-btn {
     background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
     border-color: #ffc107;
@@ -539,38 +518,40 @@ textarea:focus {
     font-weight: 400;
 }
 
-/* SECURITY OVERLAY: MAX Z-INDEX */
 #screenshotWarning {
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
-    background-color: black;
-    color: red;
+    background-color: #dc3545;
+    color: white;
     display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    z-index: 2147483647; 
+    z-index: 2147483647;
     text-align: center;
 }
 
 #screenshotWarning h1 {
-    font-size: 3em;
+    font-size: 2em;
     font-weight: 900;
     text-transform: uppercase;
     margin-bottom: 20px;
     animation: flash 1s infinite;
 }
 
-@keyframes flash {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
+#screenshotWarning p {
+    font-size: 1.2em;
+    margin-top: 10px;
 }
 
-/* Very small phones */
+@keyframes flash {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
+}
+
 @media (max-width: 360px) {
     header h1 {
         font-size: 1.1em;
@@ -607,9 +588,12 @@ textarea:focus {
     .size-option-btn {
         padding: 20px;
     }
+
+    #screenshotWarning h1 {
+        font-size: 1.5em;
+    }
 }
 
-/* Touch feedback */
 @media (hover: none) {
     .add-shape-btn:active {
         transform: scale(0.97);
