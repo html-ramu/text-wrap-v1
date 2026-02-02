@@ -23,10 +23,7 @@ let dominantColor = '#667eea';
 // Initialize ColorThief
 const colorThief = new ColorThief();
 
-// ==========================================
 // IMAGE UPLOAD
-// ==========================================
-
 imageUpload.addEventListener('change', function(e) {
     const file = e.target.files[0];
     
@@ -39,10 +36,8 @@ imageUpload.addEventListener('change', function(e) {
             previewImg.classList.add('visible');
             noImageText.classList.add('hidden');
             
-            // Show "Add to Circle" button
             addToCircleBtn.style.display = 'inline-block';
             
-            // Extract dominant color when image loads
             previewImg.onload = function() {
                 try {
                     const color = colorThief.getColor(previewImg);
@@ -59,10 +54,7 @@ imageUpload.addEventListener('change', function(e) {
     }
 });
 
-// ==========================================
 // ADD TO CIRCLE BUTTON
-// ==========================================
-
 addToCircleBtn.addEventListener('click', function() {
     if (currentImageSrc) {
         placeImageInCircle();
@@ -70,7 +62,6 @@ addToCircleBtn.addEventListener('click', function() {
     }
 });
 
-// Place image in circle with colored border
 function placeImageInCircle() {
     circleZone.innerHTML = `
         <img src="${currentImageSrc}" 
@@ -82,15 +73,11 @@ function placeImageInCircle() {
     hasImageInCircle = true;
 }
 
-// ==========================================
 // SIZE CONTROL
-// ==========================================
-
 imageSize.addEventListener('input', function(e) {
     currentSize = e.target.value;
     sizeValue.textContent = currentSize + 'px';
     
-    // Update circle image if exists
     if (hasImageInCircle) {
         placeImageInCircle();
     }
@@ -98,27 +85,19 @@ imageSize.addEventListener('input', function(e) {
     updatePreview();
 });
 
-// ==========================================
 // TEXT INPUT
-// ==========================================
-
 teluguText.addEventListener('input', updatePreview);
 
-// ==========================================
 // UPDATE PREVIEW
-// ==========================================
-
 function updatePreview() {
     const text = teluguText.value.trim();
     
-    // If no image in circle or no text
     if (!hasImageInCircle || !currentImageSrc || !text) {
         resultContainer.innerHTML = '<p class="placeholder">Choose image and add to circle</p>';
         downloadBtn.style.display = 'none';
         return;
     }
     
-    // Create wrapped content with colored border
     resultContainer.innerHTML = `
         <img 
             src="${currentImageSrc}" 
@@ -128,62 +107,101 @@ function updatePreview() {
         ${text}
     `;
     
-    // Show download button
     downloadBtn.style.display = 'block';
 }
 
-// ==========================================
 // MODAL HANDLING
-// ==========================================
-
-// Show modal when download button clicked
 downloadBtn.addEventListener('click', function() {
     sizeModal.classList.add('show');
 });
 
-// Close modal when X clicked
 closeModal.addEventListener('click', function() {
     sizeModal.classList.remove('show');
 });
 
-// Close modal when clicking outside
 sizeModal.addEventListener('click', function(e) {
     if (e.target === sizeModal) {
         sizeModal.classList.remove('show');
     }
 });
 
-// ==========================================
-// DOWNLOAD WITH SIZE SELECTION - LARGER OUTPUT
-// ==========================================
-
+// DOWNLOAD SIZE SELECTION
 sizeOptionBtns.forEach(btn => {
     btn.addEventListener('click', function() {
-        const width = parseInt(this.dataset.width);
-        const height = parseInt(this.dataset.height);
+        const type = this.dataset.type;
         
-        // Close modal
         sizeModal.classList.remove('show');
         
-        // Start download with selected size
-        downloadWithSize(width, height);
+        if (type === 'auto') {
+            downloadAutoSize();
+        } else {
+            const width = parseInt(this.dataset.width);
+            const height = parseInt(this.dataset.height);
+            downloadWithSize(width, height);
+        }
     });
 });
 
-async function downloadWithSize(width, height) {
-    // Show processing state
+// AUTO SIZE DOWNLOAD
+async function downloadAutoSize() {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
     
     try {
-        // Calculate image size based on canvas dimensions (much larger)
-        const imageCircleSize = Math.min(width, height) * 0.35; // 35% of smaller dimension
-        const borderWidth = imageCircleSize * 0.04; // 4% of image size as border
+        await new Promise(resolve => setTimeout(resolve, 100));
         
-        // Calculate font size based on canvas width (larger text)
-        const fontSize = width * 0.024; // 2.4% of width for readable text
+        const canvas = await html2canvas(resultContainer, {
+            backgroundColor: '#ffffff',
+            scale: 3,
+            logging: false,
+            useCORS: true,
+            allowTaint: true,
+            onclone: function(clonedDoc) {
+                const clonedContainer = clonedDoc.getElementById('resultContainer');
+                if (clonedContainer) {
+                    clonedContainer.style.fontFamily = "'Noto Sans Telugu', sans-serif";
+                }
+            }
+        });
         
-        // Create a temporary container with exact size
+        canvas.toBlob(function(blob) {
+            if (!blob) {
+                throw new Error('Failed to create image');
+            }
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            const timestamp = new Date().getTime();
+            
+            link.download = `telugu-text-wrap-auto-${timestamp}.png`;
+            link.href = url;
+            link.click();
+            
+            setTimeout(() => URL.revokeObjectURL(url), 100);
+            
+            downloadBtn.disabled = false;
+            downloadBtn.textContent = '⬇️ Download';
+        }, 'image/png', 0.95);
+        
+    } catch (error) {
+        console.error('Download failed:', error);
+        alert('Download failed. Please try again.');
+        
+        downloadBtn.disabled = false;
+        downloadBtn.textContent = '⬇️ Download';
+    }
+}
+
+// FIXED SIZE DOWNLOAD
+async function downloadWithSize(width, height) {
+    downloadBtn.disabled = true;
+    downloadBtn.textContent = 'Processing...';
+    
+    try {
+        const imageCircleSize = Math.min(width, height) * 0.35;
+        const borderWidth = imageCircleSize * 0.04;
+        const fontSize = width * 0.024;
+        
         const tempContainer = document.createElement('div');
         tempContainer.style.width = width + 'px';
         tempContainer.style.height = height + 'px';
@@ -199,7 +217,6 @@ async function downloadWithSize(width, height) {
         tempContainer.style.textAlign = 'justify';
         tempContainer.style.borderRadius = '20px';
         
-        // Clone the content with larger image
         const text = teluguText.value;
         tempContainer.innerHTML = `
             <img 
@@ -218,10 +235,8 @@ async function downloadWithSize(width, height) {
         
         document.body.appendChild(tempContainer);
         
-        // Wait for fonts and images to load
         await new Promise(resolve => setTimeout(resolve, 300));
         
-        // Capture with html2canvas at high quality
         const canvas = await html2canvas(tempContainer, {
             backgroundColor: '#ffffff',
             scale: 2,
@@ -232,10 +247,8 @@ async function downloadWithSize(width, height) {
             allowTaint: true
         });
         
-        // Remove temp container
         document.body.removeChild(tempContainer);
         
-        // Convert to blob and download
         canvas.toBlob(function(blob) {
             if (!blob) {
                 throw new Error('Failed to create image');
@@ -249,10 +262,8 @@ async function downloadWithSize(width, height) {
             link.href = url;
             link.click();
             
-            // Cleanup
             setTimeout(() => URL.revokeObjectURL(url), 100);
             
-            // Re-enable button
             downloadBtn.disabled = false;
             downloadBtn.textContent = '⬇️ Download';
         }, 'image/png', 0.95);
@@ -261,26 +272,19 @@ async function downloadWithSize(width, height) {
         console.error('Download failed:', error);
         alert('Download failed. Please try again.');
         
-        // Re-enable button
         downloadBtn.disabled = false;
         downloadBtn.textContent = '⬇️ Download';
     }
 }
 
-// ==========================================
 // MOBILE: Tap to upload
-// ==========================================
-
 imagePreview.addEventListener('click', function(e) {
     if (e.target !== addToCircleBtn && !previewImg.classList.contains('visible')) {
         imageUpload.click();
     }
 });
 
-// ==========================================
 // ENSURE FONTS ARE LOADED
-// ==========================================
-
 window.addEventListener('load', function() {
     if (document.fonts) {
         document.fonts.ready.then(function() {

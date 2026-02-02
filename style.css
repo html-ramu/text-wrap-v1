@@ -435,6 +435,29 @@ textarea:focus {
     font-weight: 700;
 }
 
+/* Auto Size Button - Special Styling */
+.auto-size-btn {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-color: #ffc107;
+}
+
+.auto-size-btn:hover {
+    border-color: #ff9800;
+    background: linear-gradient(135deg, #ffe082 0%, #ffd54f 100%);
+    box-shadow: 0 5px 15px rgba(255, 152, 0, 0.3);
+}
+
+.auto-size-btn .size-dimensions {
+    color: #ff6f00;
+}
+
+.size-hint {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 5px;
+    font-weight: 400;
+}
+
 /* Very small phones */
 @media (max-width: 360px) {
     header h1 {
