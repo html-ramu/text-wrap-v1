@@ -40,15 +40,14 @@ const colorThief = new ColorThief();
 // AGGRESSIVE ANTI-SCREENSHOT LOGIC
 // ============================================
 
-// 1. DETECT 3-FINGER SWIPE (Android Screenshot Gesture)
+// 1. DETECT 3-FINGER SWIPE
 document.addEventListener('touchstart', (e) => {
-    // If user touches with 3 or more fingers, they are likely trying to screenshot
     if (e.touches.length >= 3) {
         showSecurityWarning();
     }
 }, { passive: false });
 
-// 2. Disable Right Click (Context Menu)
+// 2. Disable Right Click
 document.addEventListener('contextmenu', event => {
     event.preventDefault();
     showSecurityWarning();
@@ -56,72 +55,44 @@ document.addEventListener('contextmenu', event => {
 
 // 3. Detect Keyboard Shortcuts
 document.addEventListener('keydown', (e) => {
-    // Print Screen Key
     if (e.key === 'PrintScreen') {
-        try { navigator.clipboard.writeText(''); } catch(err) {} // Suppress errors
+        navigator.clipboard.writeText('');
         showSecurityWarning();
     }
-    // Windows Snipping Tool (Win+Shift+S)
-    if (e.metaKey && e.shiftKey && e.key === 'S') { 
+    if (e.metaKey && e.shiftKey && e.key === 'S') { // Windows Snipping
         showSecurityWarning();
     }
-    // Prevent Printing and Saving (Ctrl+P, Ctrl+S)
     if (e.ctrlKey && (e.key === 'p' || e.key === 's' || e.key === 'u' || e.key === 'c')) {
         e.preventDefault();
         showSecurityWarning();
     }
-    // Mac Screenshots (Cmd+Shift+3/4)
-    if (e.metaKey && e.shiftKey && (e.key === '3' || e.key === '4')) {
-        e.preventDefault();
-        showSecurityWarning();
-    }
 });
 
-// 4. MOBILE PROTECTION: Visibility API
-// Triggers when app goes background (App Switcher / Notification Bar pulled down fully)
+// 4. MOBILE PROTECTION (Fix for "Stuck Red Screen")
 document.addEventListener("visibilitychange", () => {
     if (document.visibilityState === "hidden") {
+        // App went to background -> Show Red Screen
         showSecurityWarning();
     } else {
+        // App came back -> HIDE Red Screen immediately
         hideSecurityWarning();
     }
 });
 
-// 5. Focus/Blur Detection (Backup for desktop tools)
-window.addEventListener('blur', () => showSecurityWarning());
-window.addEventListener('focus', () => hideSecurityWarning());
-
-// 6. RESIZE DETECTION (New: Catches UI Overlays/Notification Bar partial pull)
-// If the viewport size changes significantly while the app is running, lock screen
-let lastWidth = window.innerWidth;
-let lastHeight = window.innerHeight;
-
-window.addEventListener('resize', () => {
-    // Check if the change is significant (not just a scrollbar appearing)
-    const widthDiff = Math.abs(window.innerWidth - lastWidth);
-    const heightDiff = Math.abs(window.innerHeight - lastHeight);
-    
-    // Update last known size
-    lastWidth = window.innerWidth;
-    lastHeight = window.innerHeight;
-
-    // If height changed significantly, it might be the keyboard or notification bar
-    // We flash the warning to be safe
-    if (heightDiff > 50 || widthDiff > 50) {
-        if(screenshotWarning.style.display !== 'flex') {
-             showSecurityWarning();
-             // Auto hide after a moment if they just opened keyboard
-             setTimeout(() => {
-                 if (document.visibilityState === "visible") hideSecurityWarning();
-             }, 1500);
-        }
-    }
+window.addEventListener('blur', () => {
+   showSecurityWarning();
 });
 
-// Helper Functions for Warning Screen
+window.addEventListener('focus', () => {
+   hideSecurityWarning();
+});
+
+// Helper Functions
 function showSecurityWarning() {
     if(screenshotWarning) {
         screenshotWarning.style.display = 'flex';
+    } else {
+        alert('Screenshots disabled');
     }
 }
 
@@ -246,7 +217,7 @@ function updatePreview() {
     }
     
     const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, dominantColor);
-    wrapper.classList.add('wrapped-image'); // Helper class for float
+    wrapper.classList.add('wrapped-image');
     
     resultContainer.innerHTML = '';
     resultContainer.appendChild(wrapper);
