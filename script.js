@@ -4,10 +4,15 @@ const previewImg = document.getElementById('previewImg');
 const imagePreview = document.getElementById('imagePreview');
 const noImageText = imagePreview.querySelector('.no-image');
 const addButtons = document.querySelector('.add-buttons');
+
 const addToCircleBtn = document.getElementById('addToCircleBtn');
-const addToHexagonBtn = document.getElementById('addToHexagonBtn');
+const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
+const addToFlowerBtn = document.getElementById('addToFlowerBtn');
+
 const circleZone = document.getElementById('circleZone');
-const hexagonZone = document.getElementById('hexagonZone');
+const hexadecagonZone = document.getElementById('hexadecagonZone');
+const flowerZone = document.getElementById('flowerZone');
+
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
 const sizeValue = document.getElementById('sizeValue');
@@ -22,6 +27,10 @@ let currentImageSrc = null;
 let currentShape = null;
 let currentSize = 100;
 let dominantColor = '#667eea';
+
+// POLYGON STRINGS
+const hexadecagonPoly = 'polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%)';
+const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%)';
 
 // Initialize ColorThief
 const colorThief = new ColorThief();
@@ -45,7 +54,6 @@ imageUpload.addEventListener('change', function(e) {
                 try {
                     const color = colorThief.getColor(previewImg);
                     dominantColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
-                    console.log('Dominant color:', dominantColor);
                 } catch (error) {
                     console.log('Using default color');
                     dominantColor = '#667eea';
@@ -67,12 +75,22 @@ addToCircleBtn.addEventListener('click', function() {
     }
 });
 
-// ADD TO HEXAGON BUTTON
-addToHexagonBtn.addEventListener('click', function() {
+// ADD TO HEXADECAGON BUTTON
+addToHexadecagonBtn.addEventListener('click', function() {
     if (currentImageSrc) {
         clearAllShapes();
-        currentShape = 'hexagon';
-        placeImageInShape(hexagonZone, 'hexagon');
+        currentShape = 'hexadecagon';
+        placeImageInShape(hexadecagonZone, 'hexadecagon');
+        updatePreview();
+    }
+});
+
+// ADD TO FLOWER BUTTON
+addToFlowerBtn.addEventListener('click', function() {
+    if (currentImageSrc) {
+        clearAllShapes();
+        currentShape = 'flower';
+        placeImageInShape(flowerZone, 'flower');
         updatePreview();
     }
 });
@@ -80,14 +98,20 @@ addToHexagonBtn.addEventListener('click', function() {
 // Clear all shapes
 function clearAllShapes() {
     circleZone.innerHTML = '<div class="circle-preview"><span class="drop-text">⭕</span></div>';
-    hexagonZone.innerHTML = '<div class="hexagon-preview"><span class="drop-text">⬡</span></div>';
+    hexadecagonZone.innerHTML = '<div class="hexadecagon-preview"><span class="drop-text">⚙️</span></div>';
+    flowerZone.innerHTML = '<div class="flower-preview"><span class="drop-text">🌸</span></div>';
+    
     circleZone.classList.remove('has-image');
-    hexagonZone.classList.remove('has-image');
+    hexadecagonZone.classList.remove('has-image');
+    flowerZone.classList.remove('has-image');
 }
 
 // Place image in shape
 function placeImageInShape(zone, shape) {
-    const shapeClass = shape === 'circle' ? 'circle-shape' : 'hexagon-shape';
+    let shapeClass = '';
+    if(shape === 'circle') shapeClass = 'circle-shape';
+    else if(shape === 'hexadecagon') shapeClass = 'hexadecagon-shape';
+    else if(shape === 'flower') shapeClass = 'flower-shape';
     
     zone.innerHTML = `
         <img src="${currentImageSrc}" 
@@ -104,7 +128,11 @@ imageSize.addEventListener('input', function(e) {
     sizeValue.textContent = currentSize + 'px';
     
     if (currentShape) {
-        const zone = currentShape === 'circle' ? circleZone : hexagonZone;
+        let zone;
+        if(currentShape === 'circle') zone = circleZone;
+        else if(currentShape === 'hexadecagon') zone = hexadecagonZone;
+        else if(currentShape === 'flower') zone = flowerZone;
+        
         placeImageInShape(zone, currentShape);
     }
     
@@ -124,7 +152,10 @@ function updatePreview() {
         return;
     }
     
-    const shapeClass = currentShape === 'circle' ? 'circle-shape' : 'hexagon-shape';
+    let shapeClass = '';
+    if(currentShape === 'circle') shapeClass = 'circle-shape';
+    else if(currentShape === 'hexadecagon') shapeClass = 'hexadecagon-shape';
+    else if(currentShape === 'flower') shapeClass = 'flower-shape';
     
     resultContainer.innerHTML = `
         <img 
@@ -246,10 +277,15 @@ async function downloadWithSize(width, height) {
         tempContainer.style.borderRadius = '20px';
         
         const text = teluguText.value;
-        const shapeClass = currentShape === 'circle' ? 'circle-shape' : 'hexagon-shape';
-        const shapeCSS = currentShape === 'circle' 
-            ? 'border-radius: 50%; shape-outside: circle(50%);'
-            : 'clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%); shape-outside: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);';
+        let shapeCSS = '';
+        
+        if (currentShape === 'circle') {
+            shapeCSS = 'border-radius: 50%; shape-outside: circle(50%);';
+        } else if (currentShape === 'hexadecagon') {
+            shapeCSS = `clip-path: ${hexadecagonPoly}; shape-outside: ${hexadecagonPoly};`;
+        } else if (currentShape === 'flower') {
+            shapeCSS = `clip-path: ${flowerPoly}; shape-outside: ${flowerPoly};`;
+        }
         
         tempContainer.innerHTML = `
             <img 

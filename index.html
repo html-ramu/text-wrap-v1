@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Telugu Text Wrapper</title>
     
-    <!-- Load Telugu font from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600&display=swap" rel="stylesheet">
@@ -15,15 +14,12 @@
 <body>
     <div class="container">
         
-        <!-- Header -->
         <header>
             <h1>Telugu Text Wrapper</h1>
         </header>
 
-        <!-- Main Content -->
         <div class="main-content">
             
-            <!-- Upload Button -->
             <div class="upload-section">
                 <label for="imageUpload" class="upload-btn">
                     📷 Choose Image
@@ -31,7 +27,6 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
-            <!-- Image Preview with Add Buttons -->
             <div id="imagePreview" class="image-preview">
                 <img id="previewImg" src="" alt="">
                 <p class="no-image">No image selected</p>
@@ -39,15 +34,16 @@
                     <button id="addToCircleBtn" class="add-shape-btn circle-btn">
                         ➕ Circle
                     </button>
-                    <button id="addToHexagonBtn" class="add-shape-btn hexagon-btn">
-                        ➕ Hexagon
+                    <button id="addToHexadecagonBtn" class="add-shape-btn hexadecagon-btn">
+                        ➕ 16-Gon
+                    </button>
+                    <button id="addToFlowerBtn" class="add-shape-btn flower-btn">
+                        ➕ Flower
                     </button>
                 </div>
             </div>
 
-            <!-- Shape Drop Zones -->
             <div class="drop-zones-container">
-                <!-- Circle Zone -->
                 <div class="shape-zone">
                     <p class="zone-label">Circle</p>
                     <div class="drop-zone" id="circleZone" data-shape="circle">
@@ -57,24 +53,30 @@
                     </div>
                 </div>
 
-                <!-- Hexagon Zone -->
                 <div class="shape-zone">
-                    <p class="zone-label">Hexagon</p>
-                    <div class="drop-zone" id="hexagonZone" data-shape="hexagon">
-                        <div class="hexagon-preview">
-                            <span class="drop-text">⬡</span>
+                    <p class="zone-label">16-Gon</p>
+                    <div class="drop-zone" id="hexadecagonZone" data-shape="hexadecagon">
+                        <div class="hexadecagon-preview">
+                            <span class="drop-text">⚙️</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="shape-zone" style="grid-column: span 2;">
+                    <p class="zone-label">16-Petal Flower</p>
+                    <div class="drop-zone" id="flowerZone" data-shape="flower">
+                        <div class="flower-preview">
+                            <span class="drop-text">🌸</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Size Control -->
             <div class="size-control">
                 <label>Size: <span id="sizeValue">100px</span></label>
                 <input type="range" id="imageSize" min="80" max="150" value="100">
             </div>
 
-            <!-- Text Input -->
             <div class="text-section">
                 <label for="teluguText">Your Text</label>
                 <textarea 
@@ -86,7 +88,6 @@
 
         </div>
 
-        <!-- Preview Section -->
         <div class="preview-section">
             <div class="preview-header">
                 <h2>Preview</h2>
@@ -101,7 +102,6 @@
 
     </div>
 
-    <!-- Download Size Selection Modal -->
     <div id="sizeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -123,7 +123,6 @@
         </div>
     </div>
 
-    <!-- ColorThief library for extracting dominant color -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="script.js"></script>

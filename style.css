@@ -101,13 +101,14 @@ header h1 {
     gap: 10px;
     justify-content: center;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .add-shape-btn {
     flex: 1;
-    max-width: 120px;
+    min-width: 90px;
     border: none;
-    padding: 10px 15px;
+    padding: 10px 10px;
     border-radius: 8px;
     font-size: 0.85em;
     font-weight: 600;
@@ -121,19 +122,26 @@ header h1 {
     background: #28a745;
     color: white;
 }
-
 .circle-btn:active {
     background: #218838;
     transform: scale(0.97);
 }
 
-.hexagon-btn {
-    background: #f093fb;
+.hexadecagon-btn {
+    background: #17a2b8;
     color: white;
 }
+.hexadecagon-btn:active {
+    background: #117a8b;
+    transform: scale(0.97);
+}
 
-.hexagon-btn:active {
-    background: #f5576c;
+.flower-btn {
+    background: #e83e8c;
+    color: white;
+}
+.flower-btn:active {
+    background: #bd2130;
     transform: scale(0.97);
 }
 
@@ -189,18 +197,35 @@ header h1 {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Hexagon Preview */
-.hexagon-preview {
+/* Hexadecagon Preview (16-Gon) */
+.hexadecagon-preview {
     width: 80px;
     height: 80px;
-    background: linear-gradient(135deg, #f093fb, #f5576c);
+    background: linear-gradient(135deg, #17a2b8, #138496);
     display: flex;
     align-items: center;
     justify-content: center;
     color: white;
     font-weight: 600;
     font-size: 2em;
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    /* 16-sided polygon clip-path */
+    clip-path: polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Flower Preview (16-Petal) */
+.flower-preview {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #e83e8c, #fd7e14);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 2em;
+    /* 16-petal flower clip-path (tips at 100%, valleys at 85%) */
+    clip-path: polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
@@ -218,8 +243,12 @@ header h1 {
     border-radius: 50%;
 }
 
-.shape-image.hexagon-shape {
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+.shape-image.hexadecagon-shape {
+    clip-path: polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%);
+}
+
+.shape-image.flower-shape {
+    clip-path: polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%);
 }
 
 /* Size Control */
@@ -373,9 +402,14 @@ textarea:focus {
     shape-outside: circle(50%);
 }
 
-.wrapped-image.hexagon-shape {
-    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
-    shape-outside: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+.wrapped-image.hexadecagon-shape {
+    clip-path: polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%);
+    shape-outside: polygon(50% 0%, 69% 4%, 85% 15%, 96% 31%, 100% 50%, 96% 69%, 85% 85%, 69% 96%, 50% 100%, 31% 96%, 15% 85%, 4% 69%, 0% 50%, 4% 31%, 15% 15%, 31% 4%);
+}
+
+.wrapped-image.flower-shape {
+    clip-path: polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%);
+    shape-outside: polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 77% 8%, 80% 20%, 85% 15%, 85% 26%, 92% 23%, 89% 34%, 98% 33%, 91% 42%, 100% 44%, 91% 51%, 98% 57%, 89% 60%, 92% 69%, 85% 68%, 85% 78%, 78% 74%, 75% 86%, 69% 79%, 64% 91%, 60% 82%, 54% 93%, 50% 84%, 46% 93%, 40% 82%, 36% 91%, 31% 79%, 25% 86%, 22% 74%, 15% 78%, 15% 68%, 8% 69%, 11% 60%, 2% 57%, 9% 51%, 0% 44%, 9% 42%, 2% 33%, 11% 34%, 8% 23%, 15% 26%, 15% 15%, 20% 20%, 23% 8%, 27% 16%, 31% 4%, 35% 13%, 40% 2%, 44% 12%);
 }
 
 /* Clear float after text */
@@ -528,7 +562,8 @@ textarea:focus {
     }
     
     .circle-preview,
-    .hexagon-preview {
+    .hexadecagon-preview,
+    .flower-preview {
         width: 70px;
         height: 70px;
     }
