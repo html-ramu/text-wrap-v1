@@ -20,17 +20,15 @@
 
         <div class="main-content">
             
+            <!-- Image Upload -->
             <div class="upload-section">
                 <label for="imageUpload" class="upload-btn">
                     📷 Choose Image
                 </label>
                 <input type="file" id="imageUpload" accept="image/*" hidden>
-
-                <button id="mainTextCircleBtn" class="upload-btn text-circle-btn-main">
-                    🔤 Text Circle
-                </button>
             </div>
 
+            <!-- Image Preview & Shape Buttons -->
             <div id="imagePreview" class="image-preview">
                 <img id="previewImg" src="" alt="" crossorigin="anonymous">
                 <p class="no-image">No image selected</p>
@@ -47,6 +45,7 @@
                 </div>
             </div>
 
+            <!-- Image Position Adjustment -->
             <div class="control-section" id="imageAdjustControl" style="display: none;">
                 <p class="section-label">📐 Adjust Image Position:</p>
                 <div class="position-controls">
@@ -60,6 +59,7 @@
                 </div>
             </div>
 
+            <!-- Shape Border Color -->
             <div class="control-section" id="borderColorControl" style="display: none;">
                 <p class="section-label">🎨 Shape Border Color:</p>
                 <div class="color-picker-container">
@@ -72,38 +72,9 @@
                 </div>
             </div>
 
-            <div class="control-section" id="circleTextSection" style="display: none;">
-                <p class="section-label">🔤 Circle Text Settings:</p>
-                
-                <label for="circleTextInput" style="font-size: 0.85em; font-weight: 600; color: #666;">Circle Text Content:</label>
-                <input type="text" id="circleTextInput" placeholder="Enter text for circle..." maxlength="50">
-                
-                <p class="section-label" style="margin-top: 15px;">🎨 Circle Text Color:</p>
-                <div class="color-picker-container">
-                    <input type="color" id="circleTextColor" value="#8B6914">
-                    <button class="color-preset" data-target="circleTextColor" data-color="#8B6914">Gold</button>
-                    <button class="color-preset" data-target="circleTextColor" data-color="#333333">Black</button>
-                    <button class="color-preset" data-target="circleTextColor" data-color="#DC143C">Red</button>
-                </div>
-
-                <p class="section-label" style="margin-top: 15px;">📏 Circle Text Size:</p>
-                <div class="toggle-container">
-                    <button class="toggle-btn circle-text-size-preset" data-size="14">Small</button>
-                    <button class="toggle-btn circle-text-size-preset active" data-size="18">Medium</button>
-                    <button class="toggle-btn circle-text-size-preset" data-size="24">Large</button>
-                </div>
-
-                <p class="section-label" style="margin-top: 15px;">🎨 Circle Border Color:</p>
-                <div class="color-picker-container">
-                    <input type="color" id="circleBorderColor" value="#8B6914">
-                    <button class="color-preset" data-target="circleBorderColor" data-color="#8B6914">Gold</button>
-                    <button class="color-preset" data-target="circleBorderColor" data-color="#1E90FF">Blue</button>
-                    <button class="color-preset" data-target="circleBorderColor" data-color="#000000">Black</button>
-                </div>
-            </div>
-
+            <!-- Shape Position Toggle -->
             <div class="control-section" id="positionControl" style="display: none;">
-                <p class="section-label">Placement:</p>
+                <p class="section-label">Shape Position:</p>
                 <div class="toggle-container">
                     <button id="posLeftBtn" class="toggle-btn active" data-pos="left">
                         ⬅️ Left
@@ -114,8 +85,9 @@
                 </div>
             </div>
 
-            <div class="control-section" id="sizeControl" style="display: none;">
-                <p class="section-label">Shape/Circle Size:</p>
+            <!-- Shape Size Control -->
+            <div class="control-section">
+                <p class="section-label">Shape Size:</p>
                 <div class="toggle-container">
                     <button class="toggle-btn size-preset active" data-size="150">Small</button>
                     <button class="toggle-btn size-preset" data-size="250">Medium</button>
@@ -128,8 +100,9 @@
                 </div>
             </div>
 
+            <!-- Text Section -->
             <div class="text-section">
-                <label for="teluguText">Main Body Text</label>
+                <label for="teluguText">Your Text</label>
                 <textarea 
                     id="teluguText" 
                     rows="6" 
@@ -137,20 +110,22 @@
                 >తెలుగు భాష భారతదేశంలోని అత్యంత పురాతన భాషలలో ఒకటి. ఇది ద్రావిడ భాషా కుటుంబానికి చెందినది. తెలుగు ప్రపంచంలోని అతి వేగంగా వృద్ధి చెందుతున్న భాషల్లో ఒకటిగా గుర్తించబడింది. ఈ భాష దాదాపు 8 కోట్ల మంది మాతృభాషగా మాట్లాడుతున్నారు. తెలుగు లిపి సుందరమైన వృత్తాకార రూపాలతో ప్రసిద్ధి చెందింది.</textarea>
             </div>
 
+            <!-- Text Color -->
             <div class="control-section">
-                <p class="section-label">🎨 Body Text Color:</p>
+                <p class="section-label">🎨 Text Color:</p>
                 <div class="color-picker-container">
                     <input type="color" id="textColor" value="#333333">
-                    <button class="color-preset" data-color="#333333">Black</button>
-                    <button class="color-preset" data-color="#DC143C">Red</button>
-                    <button class="color-preset" data-color="#1E90FF">Blue</button>
-                    <button class="color-preset" data-color="#228B22">Green</button>
-                    <button class="color-preset" data-color="#8B4513">Brown</button>
+                    <button class="color-preset text-color-preset" data-color="#333333">Black</button>
+                    <button class="color-preset text-color-preset" data-color="#DC143C">Red</button>
+                    <button class="color-preset text-color-preset" data-color="#1E90FF">Blue</button>
+                    <button class="color-preset text-color-preset" data-color="#228B22">Green</button>
+                    <button class="color-preset text-color-preset" data-color="#8B4513">Brown</button>
                 </div>
             </div>
 
+            <!-- Text Size -->
             <div class="control-section">
-                <p class="section-label">📏 Body Text Size:</p>
+                <p class="section-label">📏 Text Size:</p>
                 <div class="toggle-container">
                     <button class="toggle-btn text-size-preset" data-size="0.75">Small</button>
                     <button class="toggle-btn text-size-preset active" data-size="0.85">Medium</button>
@@ -158,20 +133,10 @@
                     <button class="toggle-btn text-size-preset" data-size="1.2">XL</button>
                 </div>
             </div>
-            
-            <div class="control-section">
-                <p class="section-label">🎨 Background Color:</p>
-                <div class="color-picker-container">
-                    <input type="color" id="bgColor" value="#ffffff">
-                    <button class="color-preset" data-target="bgColor" data-color="#ffffff">White</button>
-                    <button class="color-preset" data-target="bgColor" data-color="#fffbea">Cream</button>
-                    <button class="color-preset" data-target="bgColor" data-color="#f0f8ff">Alice</button>
-                    <button class="color-preset" data-target="bgColor" data-color="#ffe4e1">Mist</button>
-                </div>
-            </div>
 
         </div>
 
+        <!-- Preview Section -->
         <div class="preview-section">
             <div class="preview-header">
                 <h2>Preview</h2>
@@ -180,12 +145,13 @@
                 </button>
             </div>
             <div id="resultContainer" class="result-container">
-                <p class="placeholder">Choose Image or Text Circle to start</p>
+                <p class="placeholder">Choose image and shape to start</p>
             </div>
         </div>
 
     </div>
 
+    <!-- Download Modal -->
     <div id="sizeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -207,6 +173,7 @@
         </div>
     </div>
 
+    <!-- Screenshot Warning -->
     <div id="screenshotWarning">
         <h1>⚠️ SCREENSHOT NOT ALLOWED ⚠️</h1>
         <p>This content is protected</p>

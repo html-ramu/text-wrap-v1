@@ -5,39 +5,26 @@ const imagePreview = document.getElementById('imagePreview');
 const noImageText = imagePreview.querySelector('.no-image');
 const addButtons = document.querySelector('.add-buttons');
 
-// Buttons
 const addToCircleBtn = document.getElementById('addToCircleBtn');
 const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
 const addToFlowerBtn = document.getElementById('addToFlowerBtn');
-const mainTextCircleBtn = document.getElementById('mainTextCircleBtn'); // NEW
 
-// Content Inputs
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
 const sizeValue = document.getElementById('sizeValue');
 const resultContainer = document.getElementById('resultContainer');
-
-// Download & Modal
 const downloadBtn = document.getElementById('downloadBtn');
 const sizeModal = document.getElementById('sizeModal');
 const closeModal = document.getElementById('closeModal');
 const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
 const screenshotWarning = document.getElementById('screenshotWarning');
 
-// Control Sections
+// Control elements
 const imageAdjustControl = document.getElementById('imageAdjustControl');
 const borderColorControl = document.getElementById('borderColorControl');
 const positionControl = document.getElementById('positionControl');
-const sizeControl = document.getElementById('sizeControl'); // Added ID in HTML
 const shapeBorderColor = document.getElementById('shapeBorderColor');
 const textColor = document.getElementById('textColor');
-const circleTextSection = document.getElementById('circleTextSection');
-const circleTextInput = document.getElementById('circleTextInput');
-const circleTextColor = document.getElementById('circleTextColor');
-const circleBorderColor = document.getElementById('circleBorderColor');
-
-// Background Color (NEW)
-const bgColorInput = document.getElementById('bgColor');
 
 // Position buttons
 const moveUp = document.getElementById('moveUp');
@@ -60,14 +47,6 @@ let currentTextSize = 0.85;
 let currentTextColor = '#333333';
 let currentBorderColor = '#8B6914';
 let currentPosition = 'left';
-let currentBackgroundColor = '#ffffff';
-
-// Text Circle State
-let currentCircleText = 'TELUGU TEXT WRAPPER';
-let currentCircleTextColor = '#8B6914';
-let currentCircleTextSize = 18;
-let currentCircleBorderColor = '#8B6914';
-
 let warningTimeout = null;
 
 // Image adjustment state
@@ -156,16 +135,14 @@ imageUpload.addEventListener('change', function(e) {
             noImageText.classList.add('hidden');
             addButtons.style.display = 'flex';
             
-            // Switch to circle default when image uploaded
-            setShape('circle');
-
             previewImg.onload = function() {
                 try {
                     const color = colorThief.getColor(previewImg);
                     currentBorderColor = `rgb(${color[0]}, ${color[1]}, ${color[2]})`;
                     shapeBorderColor.value = rgbToHex(color[0], color[1], color[2]);
+                    console.log('Dominant color extracted:', currentBorderColor);
                 } catch (error) {
-                    console.warn('Color extraction failed');
+                    console.warn('Color extraction failed, using default');
                     currentBorderColor = '#8B6914';
                 }
             };
@@ -183,45 +160,20 @@ function rgbToHex(r, g, b) {
 // SHAPE SELECTION
 // ============================================
 
-// Shape buttons (dependent on image)
 addToCircleBtn.addEventListener('click', () => setShape('circle'));
 addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon'));
 addToFlowerBtn.addEventListener('click', () => setShape('flower'));
 
-// Main Text Circle Button (independent)
-mainTextCircleBtn.addEventListener('click', () => {
-    setShape('text-circle');
-});
-
 function setShape(shape) {
+    if (!currentImageSrc) return;
+    
     currentShape = shape;
     resetImageAdjustment();
     
-    // UI Logic: Show/Hide sections based on mode
-    if (shape === 'text-circle') {
-        // Hide image-specifics
-        imageAdjustControl.style.display = 'none';
-        borderColorControl.style.display = 'none';
-        
-        // Show Text Circle specifics
-        circleTextSection.style.display = 'block';
-        
-        // Ensure size and position controls are visible
-        sizeControl.style.display = 'block';
-        positionControl.style.display = 'block';
-        
-    } else {
-        // Image Mode
-        if (!currentImageSrc) {
-            alert("Please upload an image first!");
-            return;
-        }
-        imageAdjustControl.style.display = 'block';
-        borderColorControl.style.display = 'block';
-        circleTextSection.style.display = 'none';
-        sizeControl.style.display = 'block';
-        positionControl.style.display = 'block';
-    }
+    // Show controls
+    imageAdjustControl.style.display = 'block';
+    borderColorControl.style.display = 'block';
+    positionControl.style.display = 'block';
     
     updatePreview();
 }
@@ -230,17 +182,41 @@ function setShape(shape) {
 // IMAGE POSITION ADJUSTMENT
 // ============================================
 
-moveUp.addEventListener('click', () => { imageOffsetY -= 5; updatePreview(); });
-moveDown.addEventListener('click', () => { imageOffsetY += 5; updatePreview(); });
-moveLeft.addEventListener('click', () => { imageOffsetX -= 5; updatePreview(); });
-moveRight.addEventListener('click', () => { imageOffsetX += 5; updatePreview(); });
-zoomIn.addEventListener('click', () => { imageZoom += 0.1; updatePreview(); });
-zoomOut.addEventListener('click', () => { 
-    imageZoom -= 0.1; 
-    if (imageZoom < 0.5) imageZoom = 0.5; 
-    updatePreview(); 
+moveUp.addEventListener('click', () => {
+    imageOffsetY -= 5;
+    updatePreview();
 });
-resetPosition.addEventListener('click', () => { resetImageAdjustment(); updatePreview(); });
+
+moveDown.addEventListener('click', () => {
+    imageOffsetY += 5;
+    updatePreview();
+});
+
+moveLeft.addEventListener('click', () => {
+    imageOffsetX -= 5;
+    updatePreview();
+});
+
+moveRight.addEventListener('click', () => {
+    imageOffsetX += 5;
+    updatePreview();
+});
+
+zoomIn.addEventListener('click', () => {
+    imageZoom += 0.1;
+    updatePreview();
+});
+
+zoomOut.addEventListener('click', () => {
+    imageZoom -= 0.1;
+    if (imageZoom < 0.5) imageZoom = 0.5;
+    updatePreview();
+});
+
+resetPosition.addEventListener('click', () => {
+    resetImageAdjustment();
+    updatePreview();
+});
 
 function resetImageAdjustment() {
     imageOffsetX = 0;
@@ -262,42 +238,17 @@ textColor.addEventListener('input', (e) => {
     updatePreview();
 });
 
-bgColorInput.addEventListener('input', (e) => {
-    currentBackgroundColor = e.target.value;
-    updatePreview();
-});
-
-// Circle Text Colors
-circleTextColor.addEventListener('input', (e) => {
-    currentCircleTextColor = e.target.value;
-    updatePreview();
-});
-circleBorderColor.addEventListener('input', (e) => {
-    currentCircleBorderColor = e.target.value;
-    updatePreview();
-});
-
-// Generic Color Preset Handler
+// Color preset buttons
 document.querySelectorAll('.color-preset').forEach(btn => {
     btn.addEventListener('click', function() {
         const color = this.dataset.color;
-        const target = this.dataset.target;
         
-        if (target === 'circleTextColor') {
-            circleTextColor.value = color;
-            currentCircleTextColor = color;
-        } else if (target === 'circleBorderColor') {
-            circleBorderColor.value = color;
-            currentCircleBorderColor = color;
-        } else if (target === 'bgColor') {
-            bgColorInput.value = color;
-            currentBackgroundColor = color;
-        } else if (this.closest('#borderColorControl')) {
-            shapeBorderColor.value = color;
-            currentBorderColor = color;
-        } else {
+        if (this.classList.contains('text-color-preset')) {
             textColor.value = color;
             currentTextColor = color;
+        } else {
+            shapeBorderColor.value = color;
+            currentBorderColor = color;
         }
         
         updatePreview();
@@ -329,7 +280,9 @@ posRightBtn.addEventListener('click', () => {
 imageSize.addEventListener('input', function(e) {
     currentSize = parseInt(e.target.value);
     sizeValue.textContent = currentSize + 'px';
+    
     document.querySelectorAll('.size-preset').forEach(btn => btn.classList.remove('active'));
+    
     updatePreview();
 });
 
@@ -338,38 +291,32 @@ document.querySelectorAll('.size-preset').forEach(btn => {
         currentSize = parseInt(this.dataset.size);
         imageSize.value = currentSize;
         sizeValue.textContent = currentSize + 'px';
+        
         document.querySelectorAll('.size-preset').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
+        
         updatePreview();
     });
 });
 
 // ============================================
-// TEXT & FONT CONTROLS
+// TEXT SIZE CONTROLS
 // ============================================
 
 document.querySelectorAll('.text-size-preset').forEach(btn => {
     btn.addEventListener('click', function() {
         currentTextSize = parseFloat(this.dataset.size);
+        
         document.querySelectorAll('.text-size-preset').forEach(b => b.classList.remove('active'));
         this.classList.add('active');
+        
         updatePreview();
     });
 });
 
-circleTextInput.addEventListener('input', (e) => {
-    currentCircleText = e.target.value;
-    updatePreview();
-});
-
-document.querySelectorAll('.circle-text-size-preset').forEach(btn => {
-    btn.addEventListener('click', function() {
-        currentCircleTextSize = parseInt(this.dataset.size);
-        document.querySelectorAll('.circle-text-size-preset').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        updatePreview();
-    });
-});
+// ============================================
+// TEXT INPUT
+// ============================================
 
 teluguText.addEventListener('input', updatePreview);
 
@@ -380,56 +327,20 @@ teluguText.addEventListener('input', updatePreview);
 function updatePreview() {
     const text = teluguText.value.trim();
     
-    // Apply background color
-    resultContainer.style.backgroundColor = currentBackgroundColor;
-    
-    if (!currentShape) {
-        resultContainer.innerHTML = '<p class="placeholder">Choose Image or Text Circle to start</p>';
+    if (!currentShape || !currentImageSrc || !text) {
+        resultContainer.innerHTML = '<p class="placeholder">Choose image and shape to start</p>';
         downloadBtn.style.display = 'none';
         return;
     }
     
-    if (currentShape === 'text-circle') {
-        createShapePreview(text, true); // true = text circle mode
-    } else {
-        createShapePreview(text, false);
-    }
-    
+    createShapePreview(text);
     downloadBtn.style.display = 'block';
 }
 
-function createShapePreview(text, isTextCircle) {
-    if (!text && !isTextCircle) {
-        resultContainer.innerHTML = '<p class="placeholder">Enter body text to see preview</p>';
-        return;
-    }
-    
-    let wrapper;
-    if (isTextCircle) {
-        // Generate SVG for text circle
-        const svgContent = createCircleTextSVG(
-            currentCircleText || 'TELUGU TEXT WRAPPER', 
-            currentSize, 
-            currentCircleTextColor, 
-            currentCircleTextSize, 
-            currentCircleBorderColor
-        );
-        wrapper = document.createElement('div');
-        wrapper.innerHTML = svgContent;
-        // Float handling
-        wrapper.style.float = currentPosition;
-        wrapper.style.margin = currentPosition === 'left' ? '0 15px 10px 0' : '0 0 10px 15px';
-        // Shape outside for text wrapping
-        wrapper.style.width = currentSize + 'px';
-        wrapper.style.height = currentSize + 'px';
-        wrapper.style.shapeOutside = 'circle(50%)';
-        wrapper.style.borderRadius = '50%';
-    } else {
-        // Generate Image Shape
-        wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, currentBorderColor);
-        wrapper.style.float = currentPosition;
-        wrapper.style.margin = currentPosition === 'left' ? '0 15px 10px 0' : '0 0 10px 15px';
-    }
+function createShapePreview(text) {
+    const wrapper = createShapeWrapper(currentSize, currentShape, currentImageSrc, currentBorderColor);
+    wrapper.style.float = currentPosition;
+    wrapper.style.margin = currentPosition === 'left' ? '0 15px 10px 0' : '0 0 10px 15px';
     
     const textNode = document.createElement('span');
     textNode.textContent = text;
@@ -446,6 +357,7 @@ function createShapeWrapper(size, shape, src, borderColor) {
     const innerDiv = document.createElement('div');
     const img = document.createElement('img');
     
+    // Outer div (border)
     outerDiv.style.width = size + 'px';
     outerDiv.style.height = size + 'px';
     outerDiv.style.background = borderColor;
@@ -453,13 +365,15 @@ function createShapeWrapper(size, shape, src, borderColor) {
     outerDiv.style.justifyContent = 'center';
     outerDiv.style.alignItems = 'center';
     outerDiv.style.position = 'relative';
-    outerDiv.style.overflow = 'hidden'; // Important for zoom
+    outerDiv.style.overflow = 'hidden';
     
+    // Inner div (holds image with adjustment)
     innerDiv.style.width = '92%';
     innerDiv.style.height = '92%';
     innerDiv.style.position = 'relative';
     innerDiv.style.overflow = 'hidden';
     
+    // Image with position adjustment
     img.src = src;
     img.style.width = '100%';
     img.style.height = '100%';
@@ -468,6 +382,7 @@ function createShapeWrapper(size, shape, src, borderColor) {
     img.style.transition = 'transform 0.2s';
     img.crossOrigin = 'anonymous';
     
+    // Apply shape
     if (shape === 'circle') {
         outerDiv.style.borderRadius = '50%';
         outerDiv.style.shapeOutside = 'circle(50%)';
@@ -486,30 +401,6 @@ function createShapeWrapper(size, shape, src, borderColor) {
     return outerDiv;
 }
 
-// Fixed calculation to prevent disturbance
-function createCircleTextSVG(text, size, textColor, textSize, borderColor) {
-    const radius = size / 2;
-    // Make text radius proportional (82% of radius) to scale correctly with size
-    const textRadius = radius * 0.82; 
-    
-    // Scale stroke width slightly with size, min 2px max 8px
-    const strokeWidth = Math.max(2, Math.min(8, size * 0.02));
-
-    return `
-        <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" xmlns="http://www.w3.org/2000/svg">
-            <defs>
-                <path id="circlePath" d="M ${radius},${radius} m -${textRadius},0 a ${textRadius},${textRadius} 0 1,1 ${textRadius * 2},0 a ${textRadius},${textRadius} 0 1,1 -${textRadius * 2},0"/>
-            </defs>
-            <circle cx="${radius}" cy="${radius}" r="${radius * 0.95}" fill="none" stroke="${borderColor}" stroke-width="${strokeWidth}"/>
-            <text font-family="Noto Sans Telugu, sans-serif" font-size="${textSize}" font-weight="700" fill="${textColor}">
-                <textPath href="#circlePath" startOffset="50%" text-anchor="middle">
-                    ${text}
-                </textPath>
-            </text>
-        </svg>
-    `;
-}
-
 // ============================================
 // MODAL HANDLING
 // ============================================
@@ -524,7 +415,7 @@ sizeModal.addEventListener('click', (e) => {
 });
 
 // ============================================
-// DOWNLOAD LOGIC
+// DOWNLOAD SIZE SELECTION
 // ============================================
 
 sizeOptionBtns.forEach(btn => {
@@ -542,6 +433,10 @@ sizeOptionBtns.forEach(btn => {
     });
 });
 
+// ============================================
+// AUTO SIZE DOWNLOAD
+// ============================================
+
 async function downloadAutoSize() {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
@@ -550,7 +445,7 @@ async function downloadAutoSize() {
         await new Promise(resolve => setTimeout(resolve, 200));
         
         const dataUrl = await htmlToImage.toPng(resultContainer, {
-            backgroundColor: currentBackgroundColor, // Use user selected color
+            backgroundColor: '#ffffff',
             pixelRatio: 4,
             quality: 1,
             cacheBust: true,
@@ -570,15 +465,17 @@ async function downloadAutoSize() {
     }
 }
 
+// ============================================
+// FIXED SIZE DOWNLOAD
+// ============================================
+
 async function downloadWithSize(width, height) {
     downloadBtn.disabled = true;
     downloadBtn.textContent = 'Processing...';
     
     try {
         const shapeSize = Math.min(width, height) * 0.35;
-        // Scale font proportionally
         const fontSize = width * 0.024;
-        const scaledTextSize = currentCircleTextSize * (width / 954); // Base scale ref
         
         const tempContainer = document.createElement('div');
         tempContainer.style.cssText = `
@@ -588,7 +485,7 @@ async function downloadWithSize(width, height) {
             left: 0;
             top: 0;
             z-index: -9999;
-            background: ${currentBackgroundColor}; /* Use user selected color */
+            background: #ffffff;
             padding: 40px;
             box-sizing: border-box;
             font-family: 'Noto Sans Telugu', sans-serif;
@@ -598,48 +495,19 @@ async function downloadWithSize(width, height) {
             text-align: justify;
         `;
         
-        let wrapper;
-        const marginStyle = currentPosition === 'left' 
-            ? `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0` 
-            : `0 0 ${fontSize * 0.5}px ${fontSize * 1.2}px`;
-
-        if (currentShape === 'text-circle') {
-            const svg = createCircleTextSVG(
-                currentCircleText || 'TELUGU TEXT WRAPPER', 
-                shapeSize, 
-                currentCircleTextColor, 
-                scaledTextSize, 
-                currentCircleBorderColor
-            );
-            wrapper = document.createElement('div');
-            wrapper.innerHTML = svg;
-            wrapper.style.float = currentPosition;
-            wrapper.style.margin = marginStyle;
-            wrapper.style.width = shapeSize + 'px';
-            wrapper.style.height = shapeSize + 'px';
-            wrapper.style.shapeOutside = 'circle(50%)';
-            // Important for text wrapping in high-res export
-            wrapper.innerHTML = svg;
-        } else {
-            wrapper = createShapeWrapper(shapeSize, currentShape, currentImageSrc, currentBorderColor);
-            wrapper.style.float = currentPosition;
-            wrapper.style.margin = marginStyle;
-        }
-        
+        const wrapper = createShapeWrapper(shapeSize, currentShape, currentImageSrc, currentBorderColor);
+        wrapper.style.float = currentPosition;
+        wrapper.style.margin = currentPosition === 'left' ? `0 ${fontSize * 1.2}px ${fontSize * 0.5}px 0` : `0 0 ${fontSize * 0.5}px ${fontSize * 1.2}px`;
         tempContainer.appendChild(wrapper);
         
-        // Add text content
-        const textSpan = document.createElement('span');
-        textSpan.textContent = teluguText.value;
-        tempContainer.appendChild(textSpan);
+        tempContainer.appendChild(document.createTextNode(teluguText.value));
         
         document.body.appendChild(tempContainer);
         
-        // Wait for rendering
         await new Promise(resolve => setTimeout(resolve, 500));
         
         const dataUrl = await htmlToImage.toPng(tempContainer, {
-            backgroundColor: currentBackgroundColor,
+            backgroundColor: '#ffffff',
             width: width,
             height: height,
             pixelRatio: 2,
@@ -665,20 +533,29 @@ async function downloadWithSize(width, height) {
 function triggerDownload(dataUrl, suffix) {
     const link = document.createElement('a');
     const timestamp = new Date().getTime();
+    
     link.download = `telugu-text-wrap-${currentShape}-${suffix}-${timestamp}.png`;
     link.href = dataUrl;
     link.click();
 }
 
+// ============================================
+// FONT LOADING
+// ============================================
+
 window.addEventListener('load', () => {
     if (document.fonts) {
-        document.fonts.ready.then(() => console.log('Fonts loaded'));
+        document.fonts.ready.then(() => {
+            console.log('Telugu fonts loaded successfully');
+        });
     }
 });
 
-// Suppress CSS warnings
+// Suppress harmless CSS errors
 const originalError = console.error;
 console.error = function(...args) {
-    if (args[0] && args[0].includes('cssRules')) return;
+    if (args[0] && args[0].includes('cssRules')) {
+        return;
+    }
     originalError.apply(console, args);
 };
