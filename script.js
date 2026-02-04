@@ -9,6 +9,10 @@ const addToCircleBtn = document.getElementById('addToCircleBtn');
 const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
 const addToFlowerBtn = document.getElementById('addToFlowerBtn');
 const addToSquareBtn = document.getElementById('addToSquareBtn');
+const addToRectBtn = document.getElementById('addToRectBtn');
+const rectHeightControl = document.getElementById('rectHeightControl');
+const rectHeight = document.getElementById('rectHeight');
+const rectHeightValue = document.getElementById('rectHeightValue');
 
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
@@ -106,19 +110,50 @@ addToCircleBtn.addEventListener('click', () => setShape('circle'));
 addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon'));
 addToFlowerBtn.addEventListener('click', () => setShape('flower'));
 addToSquareBtn.addEventListener('click', () => setShape('square'));
+// Add Rectangle Handler
+addToRectBtn.addEventListener('click', () => setShape('rectangle'));
+
+// Add Slider Handler
+rectHeight.addEventListener('input', (e) => {
+    rectHeightValue.textContent = e.target.value + 'px';
+    updatePreview();
+});
 
 function setShape(shape) {
-    if (!currentImageSrc) return;
-    
     currentShape = shape;
-    resetImageAdjustment();
     
-    // Show controls
-    imageAdjustControl.style.display = 'block';
-    borderColorControl.style.display = 'block';
-    positionControl.style.display = 'block';
+    // 1. Show standard controls
+    // Note: If you have a variable for imageAdjustControl, make sure it matches. 
+    // If your code uses 'imageAdjustControl', keep it. 
+    // If your previous code used specific IDs, ensure they match.
+    // Based on your previous uploads, this is the standard set:
+    if (document.getElementById('imageAdjustControl')) document.getElementById('imageAdjustControl').style.display = 'block';
+    if (document.getElementById('borderColorControl')) document.getElementById('borderColorControl').style.display = 'flex';
+    if (document.getElementById('positionControl')) document.getElementById('positionControl').style.display = 'block';
+
+    // 2. Show height slider ONLY for rectangle
+    if (shape === 'rectangle') {
+        rectHeightControl.style.display = 'block';
+    } else {
+        rectHeightControl.style.display = 'none';
+    }
     
+    // 3. Reset position variables
+    // (We use global variables typically found in your script)
+    if (typeof imageX !== 'undefined') imageX = 0;
+    if (typeof imageY !== 'undefined') imageY = 0;
+    if (typeof imageScale !== 'undefined') imageScale = 1;
+    
+    // 4. Reset zoom slider if it exists
+    const zoomSlider = document.getElementById('imageZoom');
+    if (zoomSlider) zoomSlider.value = 1;
+    
+    // 5. Update the drawing
     updatePreview();
+    
+    // 6. Scroll to result
+    const resultContainer = document.getElementById('resultContainer');
+    if (resultContainer) resultContainer.scrollIntoView({ behavior: 'smooth' });
 }
 
 // ============================================
@@ -285,7 +320,18 @@ function createShapeWrapper(size, shape, src, borderColor) {
     
     // Outer div (border)
     outerDiv.style.width = size + 'px';
-    outerDiv.style.height = size + 'px';
+    
+    // NEW: Calculate height for rectangle
+    if (shape === 'rectangle') {
+        const currentW = parseInt(document.getElementById('imageSize').value);
+        const currentH = parseInt(document.getElementById('rectHeight').value);
+        // Calculate ratio so it works for both Preview and Download
+        const ratio = currentH / currentW; 
+        outerDiv.style.height = (size * ratio) + 'px';
+    } else {
+        outerDiv.style.height = size + 'px';
+    }
+    
     outerDiv.style.background = borderColor;
     outerDiv.style.display = 'flex';
     outerDiv.style.justifyContent = 'center';
@@ -314,7 +360,7 @@ function createShapeWrapper(size, shape, src, borderColor) {
         outerDiv.style.shapeOutside = 'circle(50%)';
         innerDiv.style.borderRadius = '50%';
         img.style.borderRadius = '50%';
-    } else if (shape === 'square') {
+     } else if (shape === 'square' || shape === 'rectangle') {
         // Square shape logic (no radius, no clip-path)
         outerDiv.style.borderRadius = '0';
         outerDiv.style.shapeOutside = 'none';

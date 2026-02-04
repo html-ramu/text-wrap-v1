@@ -485,3 +485,9 @@ textarea:focus {
         gap: 5px;
     }
 }
+/* Add this for the Rectangle Icon */
+.rect-icon {
+    width: 28px;
+    height: 18px;
+    border: 2px solid #667eea;
+}
