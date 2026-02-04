@@ -318,118 +318,103 @@ function createShapeWrapper(size, shape, src, borderColor) {
     const innerDiv = document.createElement('div');
     const img = document.createElement('img');
     
-    // Outer div (border)
+    // --- 1. SETUP OUTER DIV ---
     outerDiv.style.width = size + 'px';
-    
-    // NEW: Calculate height for rectangle
-    if (shape === 'rectangle') {
-        const currentW = parseInt(document.getElementById('imageSize').value);
-        const currentH = parseInt(document.getElementById('rectHeight').value);
-        // Calculate ratio so it works for both Preview and Download
-        const ratio = currentH / currentW; 
-        outerDiv.style.height = (size * ratio) + 'px';
-    } else {
-        outerDiv.style.height = size + 'px';
-    }
-    
-    outerDiv.style.background = borderColor;
     outerDiv.style.display = 'flex';
     outerDiv.style.justifyContent = 'center';
     outerDiv.style.alignItems = 'center';
     outerDiv.style.position = 'relative';
     outerDiv.style.overflow = 'hidden';
-    
-    // Inner div (holds image with adjustment)
-    innerDiv.style.width = '92%';
-    innerDiv.style.height = '92%';
-    innerDiv.style.position = 'relative';
+
+    // Calculate height for rectangle (Safe Version for Download)
+    if (shape === 'rectangle') {
+        const sizeEl = document.getElementById('imageSize');
+        const rectEl = document.getElementById('rectHeight');
+        
+        let wVal = sizeEl ? parseInt(sizeEl.value) : 150;
+        let hVal = rectEl ? parseInt(rectEl.value) : 150;
+
+        // Safety: Prevent crashes if numbers are missing
+        if (isNaN(wVal) || wVal <= 0) wVal = 150;
+        if (isNaN(hVal) || hVal <= 0) hVal = 150;
+
+        const ratio = hVal / wVal;
+        outerDiv.style.height = (size * ratio) + 'px';
+    } else {
+        outerDiv.style.height = size + 'px';
+    }
+
+    // --- 2. SETUP INNER DIV & IMAGE ---
+    innerDiv.style.width = '100%';
+    innerDiv.style.height = '100%';
     innerDiv.style.overflow = 'hidden';
+    innerDiv.style.display = 'flex';
+    innerDiv.style.justifyContent = 'center';
+    innerDiv.style.alignItems = 'center';
     
-    // Image with position adjustment
     img.src = src;
     img.style.width = '100%';
     img.style.height = '100%';
     img.style.objectFit = 'cover';
-    img.style.transform = `translate(${imageOffsetX}%, ${imageOffsetY}%) scale(${imageZoom})`;
+    
+    // Apply transformations
+    let zoomVal = 1;
+    if (typeof imageZoom !== 'undefined') {
+        zoomVal = imageZoom.value || imageZoom; 
+    }
+    const offX = (typeof imageOffsetX !== 'undefined') ? imageOffsetX : 0;
+    const offY = (typeof imageOffsetY !== 'undefined') ? imageOffsetY : 0;
+    
+    img.style.transform = `translate(${offX}%, ${offY}%) scale(${zoomVal})`;
     img.style.transition = 'transform 0.2s';
     img.crossOrigin = 'anonymous';
-    
-    // Apply shape
-    if (shape === 'circle') {
+
+    // --- 3. APPLY SHAPE LOGIC ---
+    if (shape === 'square' || shape === 'rectangle') {
+        outerDiv.style.background = 'transparent';
+        const borderThick = Math.round(size * 0.04);
+        outerDiv.style.border = `${borderThick}px solid ${borderColor}`;
+        outerDiv.style.boxSizing = 'border-box';
+        outerDiv.style.borderRadius = '0';
+        outerDiv.style.shapeOutside = 'none'; // Square doesn't need shape curve
+        
+    } else if (shape === 'circle') {
+        outerDiv.style.background = 'transparent';
+        const borderThick = Math.round(size * 0.04);
+        outerDiv.style.border = `${borderThick}px solid ${borderColor}`;
+        outerDiv.style.boxSizing = 'border-box';
         outerDiv.style.borderRadius = '50%';
-        outerDiv.style.shapeOutside = 'circle(50%)';
+        
+        // FIX: Tell text to wrap around the circle!
+        outerDiv.style.shapeOutside = 'circle(50%)'; 
+        
         innerDiv.style.borderRadius = '50%';
         img.style.borderRadius = '50%';
-     // Apply shape
-if (shape === 'circle') {
-    outerDiv.style.borderRadius = '50%';
-    outerDiv.style.shapeOutside = 'circle(50%)';
-    outerDiv.style.clipPath = 'circle(50%)';
-    
-    innerDiv.style.borderRadius = '50%';
-    innerDiv.style.clipPath = 'circle(50%)';
-    
-    img.style.borderRadius = '50%';
-    
-} else if (shape === 'square' || shape === 'rectangle') {
-    // 1. Reset standard shape properties
-    outerDiv.style.borderRadius = '0';
-    outerDiv.style.shapeOutside = 'none';
-    outerDiv.style.clipPath = 'none';
-    
-    innerDiv.style.borderRadius = '0';
-    innerDiv.style.clipPath = 'none';
-    
-    img.style.borderRadius = '0';
-    img.style.clipPath = 'none';
-    
-    // 2. FIX: Remove the background color
-    outerDiv.style.background = 'transparent';
-    
-    // 3. FIX: Add a real border
-    var borderThick = Math.round(size * 0.04);
-    
-    outerDiv.style.border = borderThick + 'px solid ' + borderColor;
-    outerDiv.style.boxSizing = 'border-box';
-    
-    // 4. Make sure inner content fills the space
-    innerDiv.style.width = '100%';
-    innerDiv.style.height = '100%';
+        outerDiv.style.clipPath = 'none';
 
-} else {
-    // Logic for Hexadecagon and Flower
-    // (We put this in an ELSE so it doesn't overwrite the others!)
-    const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
-    outerDiv.style.clipPath = poly;
-    outerDiv.style.shapeOutside = poly;
-    innerDiv.style.clipPath = poly;
-    img.style.clipPath = poly;
-}
-        // Logic for Hexadecagon and Flower
-        const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
-        outerDiv.style.clipPath = poly;
-        outerDiv.style.shapeOutside = poly;
-        innerDiv.style.clipPath = poly;
-        img.style.clipPath = poly;
+    } else {
+        // Polygons
+        outerDiv.style.background = borderColor;
+        outerDiv.style.border = 'none'; 
+        innerDiv.style.width = '92%';
+        innerDiv.style.height = '92%';
+        
+        const p16 = 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
+        const pFlower = 'circle(50%)';
+        const polyStr = (shape === 'hexadecagon') 
+            ? ((typeof hexadecagonPoly !== 'undefined') ? hexadecagonPoly : p16)
+            : ((typeof flowerPoly !== 'undefined') ? flowerPoly : pFlower);
+        
+        outerDiv.style.clipPath = polyStr;
+        outerDiv.style.shapeOutside = polyStr;
+        innerDiv.style.clipPath = polyStr;
     }
-    
+
     innerDiv.appendChild(img);
     outerDiv.appendChild(innerDiv);
+    
     return outerDiv;
 }
-
-// ============================================
-// MODAL HANDLING
-// ============================================
-
-downloadBtn.addEventListener('click', () => sizeModal.classList.add('show'));
-closeModal.addEventListener('click', () => sizeModal.classList.remove('show'));
-
-sizeModal.addEventListener('click', (e) => {
-    if (e.target === sizeModal) {
-        sizeModal.classList.remove('show');
-    }
-});
 
 // ============================================
 // DOWNLOAD SIZE SELECTION
@@ -576,3 +561,27 @@ console.error = function(...args) {
     }
     originalError.apply(console, args);
 };
+// ============================================
+// RESTORE DOWNLOAD BUTTON CLICK
+// ============================================
+
+// 1. Open the modal when Download is clicked
+if (downloadBtn) {
+    downloadBtn.addEventListener('click', () => {
+        if (sizeModal) sizeModal.classList.add('show');
+    });
+}
+
+// 2. Close modal when 'X' is clicked
+if (closeModal) {
+    closeModal.addEventListener('click', () => {
+        sizeModal.classList.remove('show');
+    });
+}
+
+// 3. Close modal when clicking outside the box
+window.addEventListener('click', (e) => {
+    if (e.target === sizeModal) {
+        sizeModal.classList.remove('show');
+    }
+});
