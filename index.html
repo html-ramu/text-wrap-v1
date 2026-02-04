@@ -20,7 +20,6 @@
 
         <div class="main-content">
             
-            <!-- Image Upload -->
             <div class="upload-section">
                 <label for="imageUpload" class="upload-btn">
                     📷 Choose Image
@@ -28,7 +27,6 @@
                 <input type="file" id="imageUpload" accept="image/*" hidden>
             </div>
 
-            <!-- Image Preview & Shape Buttons -->
             <div id="imagePreview" class="image-preview">
                 <img id="previewImg" src="" alt="" crossorigin="anonymous">
                 <p class="no-image">No image selected</p>
@@ -42,10 +40,12 @@
                     <button id="addToFlowerBtn" class="add-shape-btn flower-btn">
                         ➕ Flower
                     </button>
+                    <button id="addToSquareBtn" class="add-shape-btn square-btn">
+                        ➕ Square
+                    </button>
                 </div>
             </div>
 
-            <!-- Image Position Adjustment -->
             <div class="control-section" id="imageAdjustControl" style="display: none;">
                 <p class="section-label">📐 Adjust Image Position:</p>
                 <div class="position-controls">
@@ -59,20 +59,13 @@
                 </div>
             </div>
 
-            <!-- Shape Border Color -->
             <div class="control-section" id="borderColorControl" style="display: none;">
                 <p class="section-label">🎨 Shape Border Color:</p>
                 <div class="color-picker-container">
                     <input type="color" id="shapeBorderColor" value="#8B6914">
-                    <button class="color-preset" data-color="#8B6914">Gold</button>
-                    <button class="color-preset" data-color="#DC143C">Red</button>
-                    <button class="color-preset" data-color="#1E90FF">Blue</button>
-                    <button class="color-preset" data-color="#32CD32">Green</button>
-                    <button class="color-preset" data-color="#FF69B4">Pink</button>
                 </div>
             </div>
 
-            <!-- Shape Position Toggle -->
             <div class="control-section" id="positionControl" style="display: none;">
                 <p class="section-label">Shape Position:</p>
                 <div class="toggle-container">
@@ -85,7 +78,6 @@
                 </div>
             </div>
 
-            <!-- Shape Size Control -->
             <div class="control-section">
                 <p class="section-label">Shape Size:</p>
                 <div class="toggle-container">
@@ -100,7 +92,6 @@
                 </div>
             </div>
 
-            <!-- Text Section -->
             <div class="text-section">
                 <label for="teluguText">Your Text</label>
                 <textarea 
@@ -110,20 +101,13 @@
                 >తెలుగు భాష భారతదేశంలోని అత్యంత పురాతన భాషలలో ఒకటి. ఇది ద్రావిడ భాషా కుటుంబానికి చెందినది. తెలుగు ప్రపంచంలోని అతి వేగంగా వృద్ధి చెందుతున్న భాషల్లో ఒకటిగా గుర్తించబడింది. ఈ భాష దాదాపు 8 కోట్ల మంది మాతృభాషగా మాట్లాడుతున్నారు. తెలుగు లిపి సుందరమైన వృత్తాకార రూపాలతో ప్రసిద్ధి చెందింది.</textarea>
             </div>
 
-            <!-- Text Color -->
             <div class="control-section">
                 <p class="section-label">🎨 Text Color:</p>
                 <div class="color-picker-container">
                     <input type="color" id="textColor" value="#333333">
-                    <button class="color-preset text-color-preset" data-color="#333333">Black</button>
-                    <button class="color-preset text-color-preset" data-color="#DC143C">Red</button>
-                    <button class="color-preset text-color-preset" data-color="#1E90FF">Blue</button>
-                    <button class="color-preset text-color-preset" data-color="#228B22">Green</button>
-                    <button class="color-preset text-color-preset" data-color="#8B4513">Brown</button>
                 </div>
             </div>
 
-            <!-- Text Size -->
             <div class="control-section">
                 <p class="section-label">📏 Text Size:</p>
                 <div class="toggle-container">
@@ -136,7 +120,6 @@
 
         </div>
 
-        <!-- Preview Section -->
         <div class="preview-section">
             <div class="preview-header">
                 <h2>Preview</h2>
@@ -151,7 +134,6 @@
 
     </div>
 
-    <!-- Download Modal -->
     <div id="sizeModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -171,12 +153,6 @@
                 </button>
             </div>
         </div>
-    </div>
-
-    <!-- Screenshot Warning -->
-    <div id="screenshotWarning">
-        <h1>⚠️ SCREENSHOT NOT ALLOWED ⚠️</h1>
-        <p>This content is protected</p>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/color-thief/2.3.0/color-thief.umd.js"></script>

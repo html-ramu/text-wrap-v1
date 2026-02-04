@@ -8,6 +8,7 @@ const addButtons = document.querySelector('.add-buttons');
 const addToCircleBtn = document.getElementById('addToCircleBtn');
 const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
 const addToFlowerBtn = document.getElementById('addToFlowerBtn');
+const addToSquareBtn = document.getElementById('addToSquareBtn');
 
 const teluguText = document.getElementById('teluguText');
 const imageSize = document.getElementById('imageSize');
@@ -17,7 +18,6 @@ const downloadBtn = document.getElementById('downloadBtn');
 const sizeModal = document.getElementById('sizeModal');
 const closeModal = document.getElementById('closeModal');
 const sizeOptionBtns = document.querySelectorAll('.size-option-btn');
-const screenshotWarning = document.getElementById('screenshotWarning');
 
 // Control elements
 const imageAdjustControl = document.getElementById('imageAdjustControl');
@@ -47,7 +47,6 @@ let currentTextSize = 0.85;
 let currentTextColor = '#333333';
 let currentBorderColor = '#8B6914';
 let currentPosition = 'left';
-let warningTimeout = null;
 
 // Image adjustment state
 let imageOffsetX = 0;
@@ -60,63 +59,6 @@ const flowerPoly = 'polygon(50% 0%, 56% 12%, 60% 2%, 65% 13%, 69% 4%, 73% 16%, 7
 
 // Initialize ColorThief
 const colorThief = new ColorThief();
-
-// ============================================
-// ANTI-SCREENSHOT PROTECTION
-// ============================================
-
-document.addEventListener('touchstart', (e) => {
-    if (e.touches.length >= 3) {
-        e.preventDefault();
-        showSecurityWarning();
-    }
-}, { passive: false });
-
-document.addEventListener('contextmenu', (e) => {
-    e.preventDefault();
-    showSecurityWarning();
-});
-
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'PrintScreen') {
-        navigator.clipboard.writeText('');
-        showSecurityWarning();
-    }
-    if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 's') {
-        e.preventDefault();
-        showSecurityWarning();
-    }
-    if (e.ctrlKey && ['p', 's', 'u', 'c'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-        showSecurityWarning();
-    }
-});
-
-document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'hidden') {
-        showSecurityWarning();
-    } else {
-        hideSecurityWarning();
-    }
-});
-
-window.addEventListener('blur', () => showSecurityWarning());
-window.addEventListener('focus', () => hideSecurityWarning());
-
-function showSecurityWarning() {
-    if (screenshotWarning) {
-        screenshotWarning.style.display = 'flex';
-        clearTimeout(warningTimeout);
-        warningTimeout = setTimeout(() => hideSecurityWarning(), 2000);
-    }
-}
-
-function hideSecurityWarning() {
-    if (screenshotWarning) {
-        screenshotWarning.style.display = 'none';
-    }
-    clearTimeout(warningTimeout);
-}
 
 // ============================================
 // IMAGE UPLOAD
@@ -163,6 +105,7 @@ function rgbToHex(r, g, b) {
 addToCircleBtn.addEventListener('click', () => setShape('circle'));
 addToHexadecagonBtn.addEventListener('click', () => setShape('hexadecagon'));
 addToFlowerBtn.addEventListener('click', () => setShape('flower'));
+addToSquareBtn.addEventListener('click', () => setShape('square'));
 
 function setShape(shape) {
     if (!currentImageSrc) return;
@@ -236,23 +179,6 @@ shapeBorderColor.addEventListener('input', (e) => {
 textColor.addEventListener('input', (e) => {
     currentTextColor = e.target.value;
     updatePreview();
-});
-
-// Color preset buttons
-document.querySelectorAll('.color-preset').forEach(btn => {
-    btn.addEventListener('click', function() {
-        const color = this.dataset.color;
-        
-        if (this.classList.contains('text-color-preset')) {
-            textColor.value = color;
-            currentTextColor = color;
-        } else {
-            shapeBorderColor.value = color;
-            currentBorderColor = color;
-        }
-        
-        updatePreview();
-    });
 });
 
 // ============================================
@@ -388,7 +314,17 @@ function createShapeWrapper(size, shape, src, borderColor) {
         outerDiv.style.shapeOutside = 'circle(50%)';
         innerDiv.style.borderRadius = '50%';
         img.style.borderRadius = '50%';
+    } else if (shape === 'square') {
+        // Square shape logic (no radius, no clip-path)
+        outerDiv.style.borderRadius = '0';
+        outerDiv.style.shapeOutside = 'none';
+        outerDiv.style.clipPath = 'none';
+        innerDiv.style.borderRadius = '0';
+        innerDiv.style.clipPath = 'none';
+        img.style.borderRadius = '0';
+        img.style.clipPath = 'none';
     } else {
+        // Logic for Hexadecagon and Flower
         const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
         outerDiv.style.clipPath = poly;
         outerDiv.style.shapeOutside = poly;
