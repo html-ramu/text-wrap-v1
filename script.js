@@ -360,16 +360,51 @@ function createShapeWrapper(size, shape, src, borderColor) {
         outerDiv.style.shapeOutside = 'circle(50%)';
         innerDiv.style.borderRadius = '50%';
         img.style.borderRadius = '50%';
-     } else if (shape === 'square' || shape === 'rectangle') {
-        // Square shape logic (no radius, no clip-path)
-        outerDiv.style.borderRadius = '0';
-        outerDiv.style.shapeOutside = 'none';
-        outerDiv.style.clipPath = 'none';
-        innerDiv.style.borderRadius = '0';
-        innerDiv.style.clipPath = 'none';
-        img.style.borderRadius = '0';
-        img.style.clipPath = 'none';
-    } else {
+     // Apply shape
+if (shape === 'circle') {
+    outerDiv.style.borderRadius = '50%';
+    outerDiv.style.shapeOutside = 'circle(50%)';
+    outerDiv.style.clipPath = 'circle(50%)';
+    
+    innerDiv.style.borderRadius = '50%';
+    innerDiv.style.clipPath = 'circle(50%)';
+    
+    img.style.borderRadius = '50%';
+    
+} else if (shape === 'square' || shape === 'rectangle') {
+    // 1. Reset standard shape properties
+    outerDiv.style.borderRadius = '0';
+    outerDiv.style.shapeOutside = 'none';
+    outerDiv.style.clipPath = 'none';
+    
+    innerDiv.style.borderRadius = '0';
+    innerDiv.style.clipPath = 'none';
+    
+    img.style.borderRadius = '0';
+    img.style.clipPath = 'none';
+    
+    // 2. FIX: Remove the background color
+    outerDiv.style.background = 'transparent';
+    
+    // 3. FIX: Add a real border
+    var borderThick = Math.round(size * 0.04);
+    
+    outerDiv.style.border = borderThick + 'px solid ' + borderColor;
+    outerDiv.style.boxSizing = 'border-box';
+    
+    // 4. Make sure inner content fills the space
+    innerDiv.style.width = '100%';
+    innerDiv.style.height = '100%';
+
+} else {
+    // Logic for Hexadecagon and Flower
+    // (We put this in an ELSE so it doesn't overwrite the others!)
+    const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
+    outerDiv.style.clipPath = poly;
+    outerDiv.style.shapeOutside = poly;
+    innerDiv.style.clipPath = poly;
+    img.style.clipPath = poly;
+}
         // Logic for Hexadecagon and Flower
         const poly = shape === 'hexadecagon' ? hexadecagonPoly : flowerPoly;
         outerDiv.style.clipPath = poly;
