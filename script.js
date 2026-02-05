@@ -140,13 +140,10 @@ function setShape(shape) {
     
     // 3. Reset position variables
     // (We use global variables typically found in your script)
-    if (typeof imageX !== 'undefined') imageX = 0;
-    if (typeof imageY !== 'undefined') imageY = 0;
-    if (typeof imageScale !== 'undefined') imageScale = 1;
+    
     
     // 4. Reset zoom slider if it exists
-    const zoomSlider = document.getElementById('imageZoom');
-    if (zoomSlider) zoomSlider.value = 1;
+    
     
     // 5. Update the drawing
     updatePreview();
@@ -355,7 +352,7 @@ function createShapeWrapper(size, shape, src, borderColor) {
     img.src = src;
     img.style.width = '100%';
     img.style.height = '100%';
-    img.style.objectFit = 'cover';
+    img.style.objectFit = 'contain';
     
     // Apply transformations
     let zoomVal = 1;
@@ -399,11 +396,7 @@ function createShapeWrapper(size, shape, src, borderColor) {
         innerDiv.style.width = '92%';
         innerDiv.style.height = '92%';
         
-        const p16 = 'polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%)';
-        const pFlower = 'circle(50%)';
-        const polyStr = (shape === 'hexadecagon') 
-            ? ((typeof hexadecagonPoly !== 'undefined') ? hexadecagonPoly : p16)
-            : ((typeof flowerPoly !== 'undefined') ? flowerPoly : pFlower);
+        const polyStr = (shape === 'hexadecagon') ? hexadecagonPoly : flowerPoly;
         
         outerDiv.style.clipPath = polyStr;
         outerDiv.style.shapeOutside = polyStr;
