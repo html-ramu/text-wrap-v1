@@ -10,6 +10,7 @@ const addToHexadecagonBtn = document.getElementById('addToHexadecagonBtn');
 const addToFlowerBtn = document.getElementById('addToFlowerBtn');
 const addToSquareBtn = document.getElementById('addToSquareBtn');
 const addToRectBtn = document.getElementById('addToRectBtn');
+const addToImageBtn = document.getElementById('addToImageBtn');
 const rectHeightControl = document.getElementById('rectHeightControl');
 const rectHeight = document.getElementById('rectHeight');
 const rectHeightValue = document.getElementById('rectHeightValue');
@@ -112,6 +113,7 @@ addToFlowerBtn.addEventListener('click', () => setShape('flower'));
 addToSquareBtn.addEventListener('click', () => setShape('square'));
 // Add Rectangle Handler
 addToRectBtn.addEventListener('click', () => setShape('rectangle'));
+addToImageBtn.addEventListener('click', () => setShape('image'));
 
 // Add Slider Handler
 rectHeight.addEventListener('input', (e) => {
@@ -323,20 +325,29 @@ function createShapeWrapper(size, shape, src, borderColor) {
     outerDiv.style.position = 'relative';
     outerDiv.style.overflow = 'hidden';
 
-    // Calculate height for rectangle (Safe Version for Download)
+    // Calculate height for rectangle OR Image
     if (shape === 'rectangle') {
         const sizeEl = document.getElementById('imageSize');
         const rectEl = document.getElementById('rectHeight');
         
         let wVal = sizeEl ? parseInt(sizeEl.value) : 150;
         let hVal = rectEl ? parseInt(rectEl.value) : 150;
-
-        // Safety: Prevent crashes if numbers are missing
         if (isNaN(wVal) || wVal <= 0) wVal = 150;
         if (isNaN(hVal) || hVal <= 0) hVal = 150;
 
         const ratio = hVal / wVal;
         outerDiv.style.height = (size * ratio) + 'px';
+
+    } else if (shape === 'image') {
+        // NEW: Auto-Detect Image Ratio
+        const previewImg = document.getElementById('previewImg');
+        if (previewImg && previewImg.naturalWidth > 0) {
+            const ratio = previewImg.naturalHeight / previewImg.naturalWidth;
+            outerDiv.style.height = (size * ratio) + 'px';
+        } else {
+            outerDiv.style.height = size + 'px';
+        }
+
     } else {
         outerDiv.style.height = size + 'px';
     }
@@ -373,8 +384,14 @@ function createShapeWrapper(size, shape, src, borderColor) {
         outerDiv.style.border = `${borderThick}px solid ${borderColor}`;
         outerDiv.style.boxSizing = 'border-box';
         outerDiv.style.borderRadius = '0';
-        outerDiv.style.shapeOutside = 'none'; // Square doesn't need shape curve
+        outerDiv.style.shapeOutside = 'none'; 
         
+    } else if (shape === 'image') {
+        // NEW: No border for Image mode
+        outerDiv.style.border = 'none';
+        outerDiv.style.shapeOutside = 'none';
+        outerDiv.style.background = 'transparent';
+
     } else if (shape === 'circle') {
         outerDiv.style.background = 'transparent';
         const borderThick = Math.round(size * 0.04);

@@ -496,3 +496,13 @@ textarea:focus {
     background: #59359a;
     transform: translateY(-2px);
 }
+/* Image Button - Teal Color */
+.image-btn {
+    background: #00b894;
+    color: white;
+}
+
+.image-btn:hover {
+    background: #00a187;
+    transform: translateY(-2px);
+}
