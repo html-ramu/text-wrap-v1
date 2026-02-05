@@ -485,4 +485,14 @@ textarea:focus {
         gap: 5px;
     }
 }
-/* Add this for the Rectangle Icon */
+
+/* Rectangle Button - Indigo Color */
+.rect-btn {
+    background: #6f42c1;
+    color: white;
+}
+
+.rect-btn:hover {
+    background: #59359a;
+    transform: translateY(-2px);
+}
